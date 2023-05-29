@@ -112,9 +112,18 @@ implementation."
 
             (message "\n%s" contents)))))))
 
+;; Setup
+
 (test-helper--undercover-setup)
 
 (setq major-mode-alist nil)
+
+(let* ((source-dir (expand-file-name (or (getenv "GITHUB_WORKSPACE")
+                                         default-directory))))
+
+    (message "Setting source path to %s" source-dir)
+
+    (add-to-list 'load-path source-dir))
 
 (add-hook
  'ert-runner-reporter-run-ended-functions

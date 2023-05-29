@@ -1,5 +1,14 @@
 * harpoon
 
+#+BEGIN_HTML
+<a href='https://coveralls.io/github/Walheimat/harpoon?branch=trunk'>
+    <img
+        src='https://coveralls.io/repos/github/Walheimat/harpoon/badge.svg?branch=trunk'
+        alt='Coverage Status'
+    />
+</a>
+#+END_HTML
+
 =harpoon= skewers the monotony of hooking into (mainly language) major
 modes by providing a simple =use-package=-like macro.
 

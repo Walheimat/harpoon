@@ -1,0 +1,21 @@
+* harpoon
+
+=harpoon= skewers the monotony of hooking into (mainly language) major
+modes by providing a simple =use-package=-like macro.
+
+It grew out of my [[https://github.com/Walheimat/wal-emacs][configuration]] and therefore is currently still
+heavily geared towards packages I use (like =corfu= and =lsp-mode=). But I
+aim to slowly decouple its functionality from any particular package.
+
+** Installation
+
+If you use =straight= or =quelpa=, you know what to do.
+
+If you're on Emacs >29, I recommend using =package-vc-install=.
+
+Alternatively, provided you have Cask, you can install the package
+with =make install=.
+
+** Usage
+
+Please have a look, again, at my [[https://github.com/Walheimat/wal-emacs][configuration]] for usage examples.

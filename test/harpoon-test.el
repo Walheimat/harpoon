@@ -9,16 +9,16 @@
 (require 'harpoon nil t)
 
 (ert-deftest harpoon-prog-like ()
-  (bydi-with-mock ((run-hooks . #'bydi-rf))
+  (bydi ((:mock run-hooks :with bydi-rf))
 
     (should (equal (harpoon-prog-like) 'harpoon-prog-like-hook))))
 
 (ert-deftest test-harpoon--treesit-ready-p ()
   (defvar harpoon--treesit-alist)
-  (bydi-with-mock ((wal-modern-emacs-p . #'always)
-                   (require . #'always)
-                   (treesit-available-p . #'always)
-                   (treesit-ready-p . (lambda (it &rest _) (equal 'testable it))))
+  (bydi ((:always wal-modern-emacs-p)
+         (:always require)
+         (:always treesit-available-p)
+         (:mock treesit-ready-p :with (lambda (it &rest _) (equal 'testable it))))
 
     (let ((harpoon--treesit-modes '((test-mode . testable) (zest-mode . zestable))))
 
@@ -32,12 +32,12 @@
 
   (let ((harpoon-common-ligatures '("?")))
 
-    (bydi-with-mock ((require . #'always) ligature-set-ligatures)
+    (bydi ((:always require)
+           ligature-set-ligatures)
 
       (harpoon-set-ligatures 'test-mode '("!"))
 
       (bydi-was-called-with ligature-set-ligatures (list 'test-mode '("!" "?"))))))
-
 
 (ert-deftest harpoon-corfu-auto--sets-corfu ()
   (defvar corfu-auto-delay nil)
@@ -55,7 +55,7 @@
     (should (harpoon-slow-lsp-p 'test-mode))))
 
 (ert-deftest harpoon-lsp--does-not-set-styles-for-slow-modes ()
-  (bydi-with-mock lsp-deferred
+  (bydi lsp-deferred
 
     (let ((harpoon-lsp-slow-modes '(text-mode))
           (harpoon-lsp-function 'lsp-deferred))
@@ -69,7 +69,7 @@
         (should (equal '(basic partial-completion emacs22) completion-styles))))))
 
 (ert-deftest harpoon-lsp--otherwise-sets-styles ()
-  (bydi-with-mock lsp-deferred
+  (bydi lsp-deferred
 
     (let ((harpoon-lsp-slow-modes nil)
           (harpoon-lsp-function 'lsp-deferred))
@@ -88,7 +88,8 @@
   (should (string= "[/\\\\]\\.tests\\'" (harpoon-lsp-ignore-directory--escape ".tests"))))
 
 (ert-deftest harpoon-lsp-ignore-directory ()
-  (bydi-with-mock (harpoon-append (harpoon-lsp-ignore-directory--escape . (lambda (it) it)))
+  (bydi (harpoon-append
+         (:mock harpoon-lsp-ignore-directory--escape :with bydi-rf))
 
     (harpoon-lsp-ignore-directory "test")
 
@@ -173,7 +174,7 @@
 (ert-deftest harpoon-biased-random ()
   (let ((vals '(1 2 3 4)))
 
-    (bydi-with-mock ((random . (lambda (_) (pop vals))))
+    (bydi ((:mock random :with (lambda (_) (pop vals))))
 
       (should (eq (harpoon-biased-random 4) 3))
 
@@ -185,23 +186,23 @@
 (ert-deftest harpoon-message-in-a-bottle--shows-blue-whale ()
   (let ((bottle '("Sting is playing bass, yeah")))
 
-    (bydi-with-mock ((message . #'bydi-rf))
+    (bydi ((:mock message :with bydi-rf))
 
       (should (string-equal (harpoon-message-in-a-bottle bottle) "}    , ﬞ   ⎠ Sting is playing bass, yeah")))))
 
 (ert-deftest harpoon-message-in-a-bottle--shows-passed-string ()
   (let ((bottle '("Sting is playing bass, yeah")))
 
-    (bydi-with-mock ((message . #'bydi-rf))
+    (bydi ((:mock message :with bydi-rf))
 
       (should (string-equal (harpoon-message-in-a-bottle bottle "}< ,.__)") "}< ,.__) Sting is playing bass, yeah")))))
 
 (ert-deftest harpoon--treesit-ready-p ()
   (defvar harpoon--treesit-alist)
-  (bydi-with-mock ((harpoon-modern-emacs-p . #'always)
-                   (require . #'always)
-                   (treesit-available-p . #'always)
-                   (treesit-ready-p . (lambda (it &rest _) (equal 'testable it))))
+  (bydi ((:always harpoon-modern-emacs-p)
+         (:always require)
+         (:always treesit-available-p)
+         (:mock treesit-ready-p :with (lambda (it &rest _) (equal 'testable it))))
 
     (let ((harpoon--treesit-modes '((test-mode . testable) (zest-mode . zestable))))
 
@@ -348,7 +349,7 @@
         (harpoon-lsp-ignore-directory '(".ignoramus"))))))
 
 (ert-deftest harpoon-treesit ()
-  (bydi-with-mock ((harpoon--treesit-ready-p . #'always))
+  (bydi ((:always harpoon--treesit-ready-p))
 
     (bydi-match-expansion
      (harpoon-treesit test-mode)
@@ -368,7 +369,7 @@
                          (cons name setting))))))))
 
 (ert-deftest harpoon--mode-name--with-treeesit ()
-  (bydi-with-mock ((harpoon--treesit-ready-p . #'always))
+  (bydi ((:always harpoon--treesit-ready-p))
     (should (equal 'test-ts-mode (harpoon--mode-name 'test-mode)))))
 
 (ert-deftest harpoon-hook ()

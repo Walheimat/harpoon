@@ -10,5 +10,3 @@
 (package "harpoon" "0.1.0" "Standardized major-mode hooks")
 
 (package-file "harpoon.el")
-
-(files "*.el")

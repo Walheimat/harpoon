@@ -1,4 +1,4 @@
-;;; harpoon.el --- Hook uniformly into major-modes -*- lexical-binding: t; -*-
+;;; harpoon.el --- Hook into major-modes -*- lexical-binding: t; -*-
 
 ;; Author: Krister Schuchardt <krister.schuchardt@gmail.com>
 ;; Homepage: https://github.com/Walheimat/partial-recall

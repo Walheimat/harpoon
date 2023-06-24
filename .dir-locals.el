@@ -1,1 +1,1 @@
-((nil . ((wal-project-test-default-cmd . "make local-test"))))
+((nil . ((wal-project-install-default-cmd . "make package-install"))))

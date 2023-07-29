@@ -352,7 +352,8 @@ FUNCTIONS is a list of functions (for example modes) that should
 be called if they are bound.
 
 LSP is either nil, t or a plist. For the purpose of this macro,
-any non-nil value will enable `lsp-mode'.
+any non-nil value will eventuall cayll the
+`harpoon-lsp-function'.
 
 MESSAGES is a list of strings to randomly choose from and
 display.

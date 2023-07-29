@@ -39,15 +39,24 @@
 
       (bydi-was-called-with ligature-set-ligatures (list 'test-mode '("!" "?"))))))
 
-(ert-deftest harpoon-corfu-auto--sets-corfu ()
+(ert-deftest harpoon-completion-auto--sets-corfu ()
   (defvar corfu-auto-delay nil)
   (defvar corfu-auto-prefix nil)
 
   (with-temp-buffer
-    (harpoon-corfu-auto (list 2.1 4))
+    (harpoon-completion-auto (list 2.1 4))
 
     (should (equal 2.1 corfu-auto-delay))
     (should (equal 4 corfu-auto-prefix))))
+
+(ert-deftest completion-auto--warns ()
+  (let ((harpoon-completion-provider 'none))
+
+    (bydi (harpoon--warn)
+
+      (harpoon-completion-auto (list 1 2))
+
+      (bydi-was-called-with harpoon--warn (list "Completion provider '%s' is not handled" 'none)))))
 
 (ert-deftest harpoon-slow-lsp-p ()
   (let ((harpoon-lsp-slow-modes '(test-mode)))
@@ -118,6 +127,11 @@
 (ert-deftest harpoon--modern-emacs-p--errors-for-bad-arguments ()
   (should-error (harpoon--modern-emacs-p 27) :type 'user-error)
   (should-error (harpoon--modern-emacs-p "testing") :type 'user-error))
+
+(ert-deftest warn--formats ()
+  (bydi (display-warning)
+    (harpoon--warn "This is a %s" "test")
+    (bydi-was-called-with display-warning (list 'harpoon "This is a test" :warning))))
 
 (defvar test-target nil)
 
@@ -307,19 +321,36 @@
       (message "hi")
       (local-set-key (kbd harpoon-major-key) 'test-mode-major))))
 
-(ert-deftest harpoon--corfu ()
+(ert-deftest harpoon--completion ()
   (bydi-match-expansion
    (harpoon-function test-mode
      :messages ("Just testing")
-     :corfu (0.2 4)
+     :completion (0.2 4)
      (message "hi"))
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
       (harpoon-message-in-a-bottle '("Just testing"))
       (message "hi")
       (progn
-        (harpoon-corfu-auto '(0.2 4))
+        (harpoon-completion-auto '(0.2 4))
         (local-set-key (kbd "C-M-i") #'completion-at-point)))))
+
+(ert-deftest harpoon--completion-warns ()
+  (bydi (harpoon--warn)
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :messages ("Just testing")
+       :corfu (0.2 4)
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (harpoon-message-in-a-bottle '("Just testing"))
+        (message "hi")
+        (progn
+          (harpoon-completion-auto '(0.2 4))
+          (local-set-key (kbd "C-M-i") #'completion-at-point))))
+
+    (bydi-was-called harpoon--warn)))
 
 (ert-deftest harpoon--functions ()
   (bydi-match-expansion

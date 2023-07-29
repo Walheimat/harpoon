@@ -39,7 +39,7 @@ obeyed."
 (defcustom harpoon-lsp-slow-modes '()
   "Modes that have slow language servers.
 
-For these modes `corfu' settings will not be adjusted to be
+For these modes completion settings will not be adjusted to be
 smaller."
   :type '(repeat symbol)
   :group 'harpoon)
@@ -57,6 +57,11 @@ smaller."
 (defcustom harpoon-completion-key "C-M-i"
   "The key combination to use for `completion-at-point'."
   :type 'key-sequence
+  :group 'harpoon)
+
+(defcustom harpoon-completion-provider 'corfu
+  "The completion provider used."
+  :type 'symbol
   :group 'harpoon)
 
 (defcustom harpoon-major-key "C-c h"
@@ -90,13 +95,17 @@ Sets tab variable `indent-tabs-mode' to t."
 
 ;; Completion
 
-(defun harpoon-corfu-auto (values)
+(defun harpoon-completion-auto (values)
   "Set delay and minimum prefix using VALUES.
 
 This a list of (DELAY PREFIX-LENGTH)."
   (cl-destructuring-bind (delay prefix) values
-    (setq-local corfu-auto-delay delay
-                corfu-auto-prefix prefix)))
+    (pcase harpoon-completion-provider
+      ('corfu
+       (setq-local corfu-auto-delay delay
+                   corfu-auto-prefix prefix))
+      (_
+       (harpoon--warn "Completion provider '%s' is not handled" harpoon-completion-provider)))))
 
 ;; Ligatures
 
@@ -213,6 +222,14 @@ at or above it."
         (user-error "Provided minimum version not acceptable"))
     (>= emacs-major-version 28)))
 
+(defun harpoon--warn (message &rest args)
+  "Warn about MESSAGE.
+
+The message is formatted using optional ARGS."
+  (let ((formatted (apply #'format (append (list message) args))))
+
+    (display-warning 'harpoon formatted :warning)))
+
 (defvar harpoon-prog-like-hook nil
   "Commands that should be run for prog-like modes.")
 
@@ -225,6 +242,7 @@ at or above it."
 (defvar harpoon--keywords
   '(:major
     :corfu
+    :completion
     :functions
     :ligatures
     :lsp
@@ -316,6 +334,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &key
      major
      corfu
+     completion
      functions
      lsp
      messages
@@ -327,7 +346,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
 MAJOR is either t or nil. If it is t, a prefixed function
 will be mapped to the major key.
 
-CORFU is a list of (IDLE-DELAY PREFIX-LENGTH).
+COMPLETION (or CORFU) is a list of (IDLE-DELAY PREFIX-LENGTH).
 
 FUNCTIONS is a list of functions (for example modes) that should
 be called if they are bound.
@@ -349,6 +368,9 @@ means: do nothing. The symbol t will call
 
 The rest of the BODY will be spliced into the hook function."
   (declare (indent defun))
+
+  (when corfu
+    (harpoon--warn "Using deprecated keyword corfu, use completion instead"))
 
   `(defun ,(harpoon--function-name name t) ()
      ,(format "Hook into `%s'." name)
@@ -373,9 +395,9 @@ The rest of the BODY will be spliced into the hook function."
           ,@(harpoon--safe-body body)
 
           ,(when lsp '(harpoon-lsp-enable))
-          ,(when corfu
+          ,(when-let ((comp (or corfu completion)))
              `(progn
-                (harpoon-corfu-auto ',corfu)
+                (harpoon-completion-auto ',comp)
                 (local-set-key (kbd "C-M-i") #'completion-at-point)))
           ,(when prog-like '(run-hooks 'harpoon-prog-like-hook))
           ,(when functions

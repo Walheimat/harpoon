@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
 - Switched to using `dinghy`.
+- Custom variable `harpoon-completion-provider` that defaults to
+  current only option `'corfu`. See below.
+
+### Changed
+
+- Keyword `corfu` is now `completion` to allow for eventually
+  considering other completion libraries.
 
 ## [v0.1.0]
 

@@ -8,16 +8,13 @@
 
 (require 'bydi)
 (require 'bydi-report)
-
-(declare-function bydi-path-setup "ext:bydi.el")
-(declare-function bydi-ert-runner-setup "ext:bydi.el")
-(declare-function bydi-undercover-setup "ext:bydi.el")
+(require 'bydi-ci)
 
 ;; Setup
 
-(bydi-path-setup)
-(bydi-undercover-setup (list "harpoon.el"))
-(bydi-ert-runner-setup)
+(bydi-ci-setup-paths)
+(bydi-report-setup-undercover (list "harpoon.el"))
+(bydi-report-setup-ert-runner)
 
 ;;; test-helper.el ends here
 

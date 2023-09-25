@@ -1,8 +1,7 @@
-# Build fragments
-.cask/
-dist/
-coverage
 *.elc
-
-# Development
-harpoon-tasks.org
+.cask/
+.dir-locals.el
+coverage
+dist/
+harpoon-autoloads.el
+harpoon-pkg.el

@@ -184,32 +184,43 @@ Duplicate items are removed."
 
     (set target (delq nil (delete-dups (append val seq))))))
 
-(defun harpoon-lsp-ignore-directory (dir)
+(defun harpoon-lsp-ignore-directory (dir &optional ignore-list)
   "Make sure DIR is ignored.
 
-It can be either a list of strings or a single string."
+It can be either a list of strings or a single string.
+
+The DIR is appended to IGNORE-LIST if it is non-nil; otherwise
+the `harpoon-lsp-dir-ignore-list' is used."
   (let ((dirs (if (listp dir) dir (list dir))))
 
     (thread-last
       dirs
       (mapcar 'harpoon-lsp-ignore-directory--escape)
-      (harpoon-append harpoon-lsp-dir-ignore-list))))
+      (harpoon-append (or ignore-list harpoon-lsp-dir-ignore-list)))))
 
 (defun harpoon-slow-lsp-p (mode)
   "Check if MODE is considered slow."
   (memq mode harpoon-lsp-slow-modes))
 
-(defun harpoon-lsp-enable ()
+(defun harpoon-lsp-enable (&optional function)
   "Defer LSP setup for the file.
 
-Sets up completion styles unless the mode is considered slow."
+Sets up completion styles unless the mode is considered slow.
+This calls FUNCTION if it is non-nil, otherwise
+`harpoon-lsp-function' is used."
   (unless (harpoon-slow-lsp-p major-mode)
     (setq-local completion-styles harpoon-lsp-completion-styles))
 
-  (when harpoon-lsp-function
-    (funcall harpoon-lsp-function)))
+  (when-let ((fun (or function harpoon-lsp-function)))
+
+    (funcall fun)))
 
 ;; Helpers:
+
+(defun harpoon--maybe-plist-get (plist key)
+  "Get value of KEY from PLIST (if it is one)."
+  (and (listp plist)
+       (plist-get plist key)))
 
 (defun harpoon--modern-emacs-p (&optional min-version)
   "Check if we're using a modern version of Emacs.
@@ -352,7 +363,7 @@ FUNCTIONS is a list of functions (for example modes) that should
 be called if they are bound.
 
 LSP is either nil, t or a plist. For the purpose of this macro,
-any non-nil value will eventuall cayll the
+any non-nil value will eventually call the
 `harpoon-lsp-function'.
 
 MESSAGES is a list of strings to randomly choose from and
@@ -395,7 +406,8 @@ The rest of the BODY will be spliced into the hook function."
 
           ,@(harpoon--safe-body body)
 
-          ,(when lsp '(harpoon-lsp-enable))
+          ,(when lsp
+             `(harpoon-lsp-enable ',(harpoon--maybe-plist-get lsp :function)))
           ,(when-let ((comp (or corfu completion)))
              `(progn
                 (harpoon-completion-auto ',comp)
@@ -433,10 +445,11 @@ LIGATURES is a list of strings that should be set using
 LSP is either nil, t or a plist. If it is a plist, key
 `:ignore-dirs' can be used to add additional paths to variable
 `lsp-file-watch-ignored-directories'."
-  (when (and lsp (listp lsp) (plist-member lsp :ignore-dirs))
+  (when-let ((dirs (harpoon--maybe-plist-get lsp :ignore-dirs)))
     `(with-eval-after-load 'lsp-mode
        (when harpoon-lsp-dir-ignore-list
-         (harpoon-lsp-ignore-directory ',(plist-get lsp :ignore-dirs))))))
+         (harpoon-lsp-ignore-directory ',(plist-get lsp :ignore-dirs)
+                                       ',(plist-get lsp :dir-ignore-list))))))
 
 (cl-defmacro harpoon-treesit (name)
   "Remap mode NAME to tree-sitter variant if possible."

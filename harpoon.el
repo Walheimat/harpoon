@@ -235,7 +235,8 @@ This calls FUNCTION if it is non-nil, otherwise
 
 (defun harpoon--maybe-plist-get (plist key &optional default)
   "Get value of KEY from PLIST (if it is one)."
-  (if (plistp plist)
+  (if (and (plistp plist)
+           (plist-member plist key))
       (plist-get plist key)
     default))
 

@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Plist passed to `:lsp` now honors `:function` to set function other
   than `harpoon-lsp-function` and `:dir-ignore-list` to set variable
   other than `harpoon-lsp-dir-ignore-list`.
+- Value passed to `:completion` can now also be a plist with keys
+  `:provider`, `:delay`, `:prefix` and `:auto` to configure completion
+  (`corfu` is still the only supported provider).
 
 ## [v0.2.0]
 

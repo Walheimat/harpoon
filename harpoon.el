@@ -95,15 +95,31 @@ Sets tab variable `indent-tabs-mode' to t."
 
 ;; Completion
 
-(defun harpoon-completion-auto (values)
-  "Set delay and minimum prefix using VALUES.
+(defun harpoon-completion--parse (values)
+  "Parse VALUES for completion.
 
-This a list of (DELAY PREFIX-LENGTH)."
-  (cl-destructuring-bind (delay prefix) values
-    (pcase harpoon-completion-provider
+This is either a plist or a cons of auto delay and auto prefix.
+Return list of four."
+  (if (and (harpoon--plistp values '(:provider :auto :delay :prefix)))
+      (list (harpoon--maybe-plist-get values :provider harpoon-completion-provider)
+            (harpoon--maybe-plist-get values :auto t)
+            (harpoon--maybe-plist-get values :delay 0.2)
+            (harpoon--maybe-plist-get values :prefix 3))
+    (list harpoon-completion-provider
+          t
+          (car values)
+          (cadr values))))
+
+(defun harpoon-completion (values)
+  "Set delay and minimum prefix using VALUES."
+  (cl-destructuring-bind
+      (provider auto delay prefix)
+      (harpoon-completion--parse values)
+    (pcase provider
       ('corfu
        (setq-local corfu-auto-delay delay
-                   corfu-auto-prefix prefix))
+                   corfu-auto-prefix prefix
+                   corfu-auto auto))
       (_
        (harpoon--warn "Completion provider '%s' is not handled" harpoon-completion-provider)))))
 
@@ -217,10 +233,21 @@ This calls FUNCTION if it is non-nil, otherwise
 
 ;; Helpers:
 
-(defun harpoon--maybe-plist-get (plist key)
+(defun harpoon--maybe-plist-get (plist key &optional default)
   "Get value of KEY from PLIST (if it is one)."
-  (and (listp plist)
-       (plist-get plist key)))
+  (if (plistp plist)
+      (plist-get plist key)
+    default))
+
+(defun harpoon--plistp (plist &optional expected-keys)
+  "Check if PLIST is a plist.
+
+If optional EXPECTED-KEYS is provided, the plist must also
+contain at least one expected key."
+  (if expected-keys
+      (and (plistp plist)
+           (seq-some (lambda (it) (memq it expected-keys)) plist))
+    (plistp plist)))
 
 (defun harpoon--modern-emacs-p (&optional min-version)
   "Check if we're using a modern version of Emacs.
@@ -410,7 +437,7 @@ The rest of the BODY will be spliced into the hook function."
              `(harpoon-lsp-enable ',(harpoon--maybe-plist-get lsp :function)))
           ,(when-let ((comp (or corfu completion)))
              `(progn
-                (harpoon-completion-auto ',comp)
+                (harpoon-completion ',comp)
                 (local-set-key (kbd "C-M-i") #'completion-at-point)))
           ,(when prog-like '(run-hooks 'harpoon-prog-like-hook))
           ,(when functions

@@ -39,22 +39,33 @@
 
       (bydi-was-called-with ligature-set-ligatures (list 'test-mode '("!" "?"))))))
 
-(ert-deftest harpoon-completion-auto--sets-corfu ()
+(ert-deftest harpoon-completion--sets-corfu ()
   (defvar corfu-auto-delay nil)
   (defvar corfu-auto-prefix nil)
 
   (with-temp-buffer
-    (harpoon-completion-auto (list 2.1 4))
+    (harpoon-completion (list 2.1 4))
 
     (should (equal 2.1 corfu-auto-delay))
     (should (equal 4 corfu-auto-prefix))))
+
+(ert-deftest harpoon-completion--sets-corfu-using-plist ()
+  (bydi ((:watch corfu-auto-delay)
+         (:watch corfu-auto-prefix)
+         (:watch corfu-auto))
+
+    (harpoon-completion '(:provider corfu :auto nil :delay 0.1 :prefix 5))
+
+    (bydi-was-set-to corfu-auto nil)
+    (bydi-was-set-to corfu-auto-delay 0.1)
+    (bydi-was-set-to corfu-auto-prefix 5)))
 
 (ert-deftest completion-auto--warns ()
   (let ((harpoon-completion-provider 'none))
 
     (bydi (harpoon--warn)
 
-      (harpoon-completion-auto (list 1 2))
+      (harpoon-completion (list 1 2))
 
       (bydi-was-called-with harpoon--warn (list "Completion provider '%s' is not handled" 'none)))))
 
@@ -110,6 +121,12 @@
 
     (bydi-was-called-with harpoon-append (list harpoon-lsp-dir-ignore-list '("test" "best")))))
 
+(ert-deftest harpoon--plistp ()
+  (should (harpoon--plistp '(1 2)))
+  (should-not (harpoon--plistp '(1 2) '(:key)))
+  (should (harpoon--plistp '(:a 1 :b 2)))
+  (should-not (harpoon--plistp '(:a 1 :b 2) '(:key)))
+  (should (harpoon--plistp '(:a 1 :b 2 :key 3) '(:key))))
 
 (ert-deftest harpoon--modern-emacs-p ()
   (let ((emacs-major-version 30))
@@ -342,7 +359,7 @@
       (harpoon-message-in-a-bottle '("Just testing"))
       (message "hi")
       (progn
-        (harpoon-completion-auto '(0.2 4))
+        (harpoon-completion '(0.2 4))
         (local-set-key (kbd "C-M-i") #'completion-at-point)))))
 
 (ert-deftest harpoon--completion-warns ()
@@ -357,7 +374,7 @@
         (harpoon-message-in-a-bottle '("Just testing"))
         (message "hi")
         (progn
-          (harpoon-completion-auto '(0.2 4))
+          (harpoon-completion '(0.2 4))
           (local-set-key (kbd "C-M-i") #'completion-at-point))))
 
     (bydi-was-called harpoon--warn)))

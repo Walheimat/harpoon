@@ -17,7 +17,7 @@
 (require 'subr-x)
 (require 'treesit nil t)
 
-;; Customization
+;;; -- Customization
 
 (defgroup harpoon nil
   "Harpoon settings."
@@ -78,7 +78,7 @@ functions unless `:checker' is passed symbol `disabled'."
   :type 'key-sequence
   :group 'harpoon)
 
-;; Indentation
+;;; -- Indentation
 
 (defun harpoon-disable-tabs ()
   "Disable tabs.
@@ -102,7 +102,7 @@ Sets tab variable `indent-tabs-mode' to t."
       (harpoon-enable-tabs)
     (harpoon-disable-tabs)))
 
-;; Completion
+;;; -- Completion
 
 (defun harpoon-completion--parse (values)
   "Parse VALUES for completion.
@@ -132,7 +132,7 @@ Return list of four."
       (_
        (harpoon--warn "Completion provider '%s' is not handled" harpoon-completion-provider)))))
 
-;; Ligatures
+;;; -- Ligatures
 
 (defconst harpoon-common-ligatures
   '(
@@ -157,7 +157,7 @@ LIGATURES."
   (when (require 'ligature nil t)
     (ligature-set-ligatures modes (append ligatures harpoon-common-ligatures))))
 
-;; Messages:
+;;; -- Messages
 
 (defconst harpoon-ascii-blue-whale (propertize "}    , ﬞ   ⎠" 'face 'mode-line-emphasis)
   "A small, highlighted ASCII blue whale.")
@@ -193,7 +193,7 @@ whale by default."
               " "
               (propertize message 'face 'italic)))))
 
-;; LSP:
+;;; -- LSP
 
 (defun harpoon-lsp-ignore-directory--escape (dir)
   "Escape directory DIR."
@@ -240,7 +240,7 @@ This calls FUNCTION if it is non-nil, otherwise
 
     (funcall fun)))
 
-;; Helpers:
+;;; -- Helpers
 
 (defun harpoon--maybe-plist-get (plist key &optional default)
   "Get value of KEY from PLIST (if it is one)."
@@ -292,7 +292,7 @@ The message is formatted using optional ARGS."
   "Run `prog-like-hook' functions."
   (run-hooks 'harpoon-prog-like-hook))
 
-;; Macro helpers
+;;; -- Macro helpers
 
 (defvar harpoon--keywords
   '(:major
@@ -381,7 +381,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
       (concat "-" suffix)
       (intern))))
 
-;; Macros
+;;; -- Macros
 
 (cl-defmacro harpoon-function
     (name
@@ -521,7 +521,7 @@ LSP is either nil, t or a plist. If it is a plist, key
 
            (add-to-list 'all-the-icons-mode-icon-alist (cons name setting)))))))
 
-;; API
+;;; -- API
 
 (cl-defmacro harpoon (name &rest args)
   "Hook into mode NAME.

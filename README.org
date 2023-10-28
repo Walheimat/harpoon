@@ -27,4 +27,78 @@ with =make package-install=.
 
 ** Usage
 
-Please have a look, again, at my [[https://github.com/Walheimat/wal-emacs][configuration]] for usage examples.
+Let's take a look at a form using all currently available features.
+
+#+begin_src emacs-lisp
+(harpoon some-mode
+  :major t
+  :completion (:provider corfu :auto t :prefix 1 :delay 0.1)
+  :functions (some-fun other-fun)
+  :ligatures ("::" ">>")
+  :lsp (:function lsp-deferred :dir-ignore-list lsp-file-watch-ignored-list :ignore-dirs (".bucket"))
+  :messages ("Something in the way" "She moves")
+  :prog-like t
+  :tabs t
+  :checker flycheck-mode
+
+  (some-other-fun)
+  (setq some-other-var t))
+#+end_src
+
+Setting =:major t= will bind the value of =harpoon-major-key= to a
+symbol named =some-mode-major=. In my configuration, this is a
+=transient= map for the current =major-mode= and probably not relevant
+to anyone else.
+
+The setting for =:completion= is a plist configuring =corfu= to enable
+automatic completion with a prefix length of 1 and a delay of 0.1.
+Note that currently only =corfu= completion is supported.
+
+The list of symbols passed to =:functions= are called on the condition
+that they are bound when =some-mode= is enabled.
+
+The list of strings passed to =:ligatures= will be set for =some-mode=
+using package =ligature= provided it can be required. Have a look at
+=harpoon-common-ligatures= for a list of ligatures always set up.
+
+The plist passed to =:lsp= configures =lsp-mode= to add directory
+".bucket" to its ignore list and call =lsp-deferred= when =some-mode=
+is enabled. Note that you don't need to set =:function= if you set
+=harpoon-lsp-function=, but you could set =eglot-ensure= here instead
+to have some other mode use that.
+
+Entries in the list of strings passed to =:messages= will be displayed
+randomly when =some-mode= is enabled.
+
+If =:prog-like= is =t=, hook =prog-like-hook= is run. This is useful
+when =some-mode= is not derived from =prog-mode= but kind of like one
+(think =yaml-mode=) and you want to set up the same minor-modes for it
+that you do for real prog modes.
+
+The symbol passed to =:tabs= can be either =t=, =always= or =never=.
+The latter two will set =indent-tabs-mode= to =t= or =nil=. Symbol =t=
+will setting =indent-tabs-mode= to =t= dependent on the value of
+=harpoon-prefer-tabs= which is a custom variable that should be set
+using a =.dir-locals.el= file.
+
+The symbol passed to =:checker= should be the name of a syntax
+checker. You normally should instead just set
+=harpoon-checker-function= but if you have modes that should use
+another checker, set it here. You can also pass symbol =disabled= to
+instead don't enable any checker even if =harpoon-checker-function= is
+set.
+
+Any form after the keyword arguments will also be evaluated when
+=some-mode= is enabled.
+
+The macro will set up function =some-mode-harpoon= that will be added
+to =some-mode-hook=. Note that if there is an alternative =treesit=
+mode that can be used the hook is created for it instead. So if you
+have the grammar for JavaScript, for example, and set up =harpoon= for
+=js-mode=, the hook will be created for =js-ts-mode=. Since the
+pattern for mode => language, and mode => treesitter variant isn't
+uniform, this currently only works for a small number of
+modes/languages.
+
+Please also have a look, again, at my [[https://github.com/Walheimat/wal-emacs][configuration]] for usage
+examples.

@@ -64,6 +64,15 @@ smaller."
   :type 'symbol
   :group 'harpoon)
 
+(defcustom harpoon-checker-function nil
+  "The checker to use.
+
+For example `flymake-mode' or `flycheck-mode'. If this variable
+is set, the checker function will be called for all hook
+functions unless `:checker' is passed symbol `disabled'."
+  :type 'symbol
+  :group 'harpoon)
+
 (defcustom harpoon-major-key "C-c h"
   "The key combination to use for a `major-mode' keymap."
   :type 'key-sequence
@@ -250,6 +259,13 @@ contain at least one expected key."
            (seq-some (lambda (it) (memq it expected-keys)) plist))
     (plistp plist)))
 
+(defun harpoon--value-unless-disabled (value &optional default)
+  "Return VALUE unless it is the symbol `disabled'.
+
+If VALUE is not disabled but nil, optionally return DEFAULT."
+  (unless (eq value 'disabled)
+    (or value default)))
+
 (defun harpoon--modern-emacs-p (&optional min-version)
   "Check if we're using a modern version of Emacs.
 
@@ -287,7 +303,8 @@ The message is formatted using optional ARGS."
     :lsp
     :messages
     :prog-like
-    :tabs))
+    :tabs
+    :checker))
 
 (defun harpoon--safe-body (body)
   "Collect everything from BODY that's a key."
@@ -379,6 +396,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      messages
      prog-like
      tabs
+     checker
      &allow-other-keys)
   "Create hook function for NAME.
 
@@ -405,6 +423,8 @@ means: do nothing. The symbol t will call
 `harpoon-maybe-enable-tabs'; the symbol `always' will call
 `harpoon-enable-tabs' and the symbol `never' will call
 `harpoon-disable-tabs'.
+
+CHECKER is the function to call to enable a syntax checker.
 
 The rest of the BODY will be spliced into the hook function."
   (declare (indent defun))
@@ -436,6 +456,8 @@ The rest of the BODY will be spliced into the hook function."
 
           ,(when lsp
              `(harpoon-lsp-enable ',(harpoon--maybe-plist-get lsp :function)))
+          ,(when-let ((checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
+             `(,checker))
           ,(when-let ((comp (or corfu completion)))
              `(progn
                 (harpoon-completion ',comp)

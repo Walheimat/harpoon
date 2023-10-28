@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Value passed to `:completion` can now also be a plist with keys
   `:provider`, `:delay`, `:prefix` and `:auto` to configure completion
   (`corfu` is still the only supported provider).
+- New key `:checker` to set the function to call for syntax checks. It
+  can also be set using new custom variable
+  `harpoon-checker-function`.
 
 ## [v0.2.0]
 

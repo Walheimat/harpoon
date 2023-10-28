@@ -348,6 +348,34 @@
       (message "hi")
       (local-set-key (kbd harpoon-major-key) 'test-mode-major))))
 
+(ert-deftest harpoon-function--checker ()
+  (bydi-match-expansion
+   (harpoon-function test-mode
+     :checker flycheck-mode
+     (message "hi"))
+   `(defun test-mode-harpoon ()
+      "Hook into `test-mode'."
+      (message "hi")
+      (flycheck-mode)))
+
+  (let ((harpoon-checker-function 'flymake-mode))
+
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (message "hi")
+        (flymake-mode)))
+
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :checker disabled
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (message "hi")))))
+
 (ert-deftest harpoon--completion ()
   (bydi-match-expansion
    (harpoon-function test-mode

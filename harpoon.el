@@ -454,10 +454,10 @@ The rest of the BODY will be spliced into the hook function."
 
           ,@(harpoon--safe-body body)
 
-          ,(when lsp
-             `(harpoon-lsp-enable ',(harpoon--maybe-plist-get lsp :function)))
           ,(when-let ((checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
              `(,checker))
+          ,(when lsp
+             `(harpoon-lsp-enable ',(harpoon--maybe-plist-get lsp :function)))
           ,(when-let ((comp (or corfu completion)))
              `(progn
                 (harpoon-completion ',comp)

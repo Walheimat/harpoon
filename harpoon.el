@@ -78,6 +78,11 @@ functions unless `:checker' is passed symbol `disabled'."
   :type 'key-sequence
   :group 'harpoon)
 
+(defcustom harpoon-log nil
+  "Whether to log during macro expansion."
+  :type 'boolean
+  :group 'harpoon)
+
 ;;; -- Indentation
 
 (defun harpoon-disable-tabs ()
@@ -284,6 +289,11 @@ The message is formatted using optional ARGS."
   (let ((formatted (apply #'format (append (list message) args))))
 
     (display-warning 'harpoon formatted :warning)))
+
+(defun harpoon--log (fmt &rest args)
+  "Use ARGS to format FMT if logging is enabled."
+  (when harpoon-log
+    (apply #'message fmt args)))
 
 (defvar harpoon-prog-like-hook nil
   "Commands that should be run for prog-like modes.")

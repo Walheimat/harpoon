@@ -145,10 +145,24 @@
   (should-error (harpoon--modern-emacs-p 27) :type 'user-error)
   (should-error (harpoon--modern-emacs-p "testing") :type 'user-error))
 
-(ert-deftest warn--formats ()
+(ert-deftest harpoon-warn--formats ()
   (bydi (display-warning)
     (harpoon--warn "This is a %s" "test")
     (bydi-was-called-with display-warning (list 'harpoon "This is a test" :warning))))
+
+(ert-deftest harpoon-log--formats ()
+  (let ((harpoon-log nil))
+
+    (bydi (message)
+      (harpoon--log "This is a %s" "test")
+
+      (bydi-was-not-called message)
+
+      (setq harpoon-log t)
+
+      (harpoon--log "This is a %s" "test")
+
+      (bydi-was-called-with message (list "This is a %s" "test")))))
 
 (defvar test-target nil)
 

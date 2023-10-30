@@ -114,7 +114,7 @@ Sets tab variable `indent-tabs-mode' to t."
 
 ;;; -- Completion
 
-(defun harpoon-completion--parse (values)
+(defun harpoon--completion-parse (values)
   "Parse VALUES for completion.
 
 This is either a plist or a cons of auto delay and auto prefix.
@@ -129,18 +129,23 @@ Return list of four."
           (car values)
           (cadr values))))
 
-(defun harpoon-completion (values)
-  "Set delay and minimum prefix using VALUES."
+(defun harpoon--completion (values name)
+  "Set delay and minimum prefix using VALUES for NAME."
   (cl-destructuring-bind
       (provider auto delay prefix)
-      (harpoon-completion--parse values)
+      (harpoon--completion-parse values)
+    (harpoon--log
+     "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
+     provider name auto delay prefix)
     (pcase provider
       ('corfu
-       (setq-local corfu-auto-delay delay
-                   corfu-auto-prefix prefix
-                   corfu-auto auto))
+       `((setq-local corfu-auto-delay ,delay
+                     corfu-auto-prefix ,prefix
+                     corfu-auto ,auto)
+         (local-set-key (kbd "C-M-i") #'completion-at-point)))
       (_
-       (harpoon--warn "Completion provider '%s' is not handled" harpoon-completion-provider)))))
+       (harpoon--warn "Completion provider '%s' is not handled" provider)
+       nil))))
 
 ;;; -- Ligatures
 
@@ -474,10 +479,7 @@ The rest of the BODY will be spliced into the hook function."
              `(,checker))
           ,(when lsp
              `(harpoon-lsp-enable ',(harpoon--maybe-plist-get lsp :function)))
-          ,(when-let ((comp (or corfu completion)))
-             `(progn
-                (harpoon-completion ',comp)
-                (local-set-key (kbd "C-M-i") #'completion-at-point)))
+          ,@(harpoon--completion (or corfu completion) name)
           ,(when prog-like '(run-hooks 'harpoon-prog-like-hook))
           ,(when functions
              `(progn ,@(mapcar (lambda (it)

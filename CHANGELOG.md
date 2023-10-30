@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   information during macro expansion.
 - Warnings can now be suppressed when `harpoon-suppress-warnings` is
   `t`.
+- The completion setup is now logged when `harpoon-log` is set to `t`.
 
 ## [v0.3.0]
 

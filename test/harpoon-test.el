@@ -66,35 +66,6 @@
 
     (should (harpoon-lsp--slow-server-p 'test-mode))))
 
-(ert-deftest harpoon-lsp--does-not-set-styles-for-slow-modes ()
-  (bydi lsp-deferred
-
-    (let ((harpoon-lsp-slow-modes '(text-mode))
-          (harpoon-lsp-function 'lsp-deferred))
-
-      (with-temp-buffer
-        (setq major-mode 'text-mode)
-
-        (harpoon-lsp--enable)
-
-        (bydi-was-called lsp-deferred)
-        (should (equal '(basic partial-completion emacs22) completion-styles))))))
-
-(ert-deftest harpoon-lsp--otherwise-sets-styles ()
-  (bydi lsp-deferred
-
-    (let ((harpoon-lsp-slow-modes nil)
-          (harpoon-lsp-function 'lsp-deferred))
-
-      (with-temp-buffer
-        (setq major-mode 'text-mode)
-
-        (harpoon-lsp--enable)
-
-        (bydi-was-called lsp-deferred)
-        (should (equal '(partial-completion basic) completion-styles))))))
-
-
 (ert-deftest harpoon-lsp--escape-ignore-directory ()
   (should (string= "[/\\\\]tests\\'" (harpoon-lsp--escape-ignore-directory "tests")))
   (should (string= "[/\\\\]\\.tests\\'" (harpoon-lsp--escape-ignore-directory ".tests"))))
@@ -267,7 +238,7 @@
         :lsp t
         :tabs t)
 
-      (harpoon-lsp
+      (harpoon-lsp test-mode
        :messages ("Just testing")
        :lsp t
        :tabs t)
@@ -275,50 +246,50 @@
       (harpoon-treesit test-mode))))
 
 (ert-deftest harpoon-function ()
-  (bydi-match-expansion
-   (harpoon-function test-mode
-     :messages ("Just testing")
-     :lsp t)
-   `(defun test-mode-harpoon ()
-      "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
-      (harpoon-lsp--enable 'nil))))
+  (let ((harpoon-lsp-function 'lsp-deferred))
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :messages ("Just testing")
+       :lsp t)
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (harpoon-message--in-a-bottle '("Just testing"))
+        (unless (harpoon-lsp--slow-server-p major-mode)
+          (setq-local completion-styles harpoon-lsp-completion-styles))
+        (lsp-deferred)))))
 
 (ert-deftest harpoon-function--custom ()
   (bydi-match-expansion
    (harpoon-function test-mode
      :messages ("Just testing")
-     :lsp (:function lsp-deferred))
+     :lsp (:function eglot-ensure))
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
       (harpoon-message--in-a-bottle '("Just testing"))
-      (harpoon-lsp--enable 'lsp-deferred))))
+      (unless (harpoon-lsp--slow-server-p major-mode)
+          (setq-local completion-styles harpoon-lsp-completion-styles))
+        (eglot-ensure))))
 
 (ert-deftest harpoon-function--some-symbol ()
   (bydi-match-expansion
    (harpoon-function test-mode
      :messages ("Just testing")
-     :lsp t
      :tabs anything)
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
       (harpoon-message--in-a-bottle '("Just testing"))
-      (progn
-        (hack-local-variables)
-        (harpoon-tabs--maybe-enable))
-      (harpoon-lsp--enable 'nil))))
+      (hack-local-variables)
+      (harpoon-tabs--maybe-enable))))
 
 (ert-deftest harpoon-function--enable-indent ()
   (bydi-match-expansion
    (harpoon-function test-mode
      :messages ("Just testing")
-     :lsp t
      :tabs always)
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
       (harpoon-message--in-a-bottle '("Just testing"))
-      (harpoon-tabs--enable)
-      (harpoon-lsp--enable 'nil))))
+      (harpoon-tabs--enable))))
 
 (ert-deftest harpoon-function--no-tabs ()
   (bydi-match-expansion
@@ -441,14 +412,14 @@
 
 (ert-deftest harpoon-lsp ()
   (bydi-match-expansion
-   (harpoon-lsp :lsp (:ignore-dirs (".ignoramus")))
+   (harpoon-lsp test-mode :lsp (:ignore-dirs (".ignoramus")))
    `(with-eval-after-load 'lsp-mode
       (when harpoon-lsp-dir-ignore-list
         (harpoon-lsp--ignore-directory '(".ignoramus") 'nil)))))
 
 (ert-deftest harpoon-lsp--custom-dir-var ()
   (bydi-match-expansion
-   (harpoon-lsp :lsp (:ignore-dirs (".ignoramus") :dir-ignore-list lsp-file-watch-ignored-directories))
+   (harpoon-lsp test-mode :lsp (:ignore-dirs (".ignoramus") :dir-ignore-list lsp-file-watch-ignored-directories))
    `(with-eval-after-load 'lsp-mode
       (when harpoon-lsp-dir-ignore-list
         (harpoon-lsp--ignore-directory '(".ignoramus") 'lsp-file-watch-ignored-directories)))))
@@ -459,7 +430,6 @@
     (bydi-match-expansion
      (harpoon-treesit test-mode)
      `(progn
-        (message "Remapping %s to %s" 'test-mode 'test-ts-mode)
         (add-to-list 'major-mode-remap-alist
                      '(test-mode . test-ts-mode))
         (with-eval-after-load 'all-the-icons

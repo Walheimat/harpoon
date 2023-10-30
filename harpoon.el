@@ -112,6 +112,24 @@ Sets tab variable `indent-tabs-mode' to t."
       (harpoon-tabs--enable)
     (harpoon-tabs--disable)))
 
+(defun harpoon-tabs--setup (tabs name)
+  "Setup TABS for NAME."
+  (cond
+   ((equal 'never tabs)
+    (harpoon--log "No tabs will be used for `%s'" name)
+    '((harpoon-tabs--disable)))
+
+   ((equal 'always tabs)
+    (harpoon--log "Tabs will be used for `%s'" name)
+    '((harpoon-tabs--enable)))
+
+   ((not tabs) nil)
+
+   (t
+    (harpoon--log "Tabs will be used conditionally for `%s'" name)
+    '((hack-local-variables)
+      (harpoon-tabs--maybe-enable)))))
+
 ;;; -- Completion
 
 (defun harpoon-completion--parse (values)
@@ -162,15 +180,20 @@ Return list of four."
     )
   "A list of ligatures available in all programming modes.")
 
-(defun harpoon-ligatures--set-ligatures (modes ligatures)
-  "Set LIGATURES for MODES.
+(defun harpoon-ligatures--set-ligatures (mode ligatures)
+  "Set LIGATURES for MODE.
 
-All ligatures in `harpoon-ligatures--common-ligatures' will be appended to
-LIGATURES."
+All ligatures in `harpoon-ligatures--common-ligatures' will be
+appended to LIGATURES."
   (declare-function ligature-set-ligatures "ext:ligature.el")
 
-  (when (require 'ligature nil t)
-    (ligature-set-ligatures modes (append ligatures harpoon-ligatures--common-ligatures))))
+  (and-let* (((require 'ligature nil t))
+             (combined (append ligatures harpoon-ligatures--common-ligatures)))
+
+    (harpoon--log "Setting up ligatures [%s] for `%s'"
+                  (string-join combined " ")
+                  mode)
+    (ligature-set-ligatures mode combined)))
 
 ;;; -- Messages
 
@@ -219,18 +242,15 @@ the `harpoon-lsp-dir-ignore-list' is used."
   "Check if MODE is considered slow."
   (memq mode harpoon-lsp-slow-modes))
 
-(defun harpoon-lsp--enable (&optional function)
+(defun harpoon-lsp--setup (function)
   "Defer LSP setup for the file.
 
 Sets up completion styles unless the mode is considered slow.
 This calls FUNCTION if it is non-nil, otherwise
 `harpoon-lsp-function' is used."
-  (unless (harpoon-lsp--slow-server-p major-mode)
-    (setq-local completion-styles harpoon-lsp-completion-styles))
-
-  (when-let ((fun (or function harpoon-lsp-function)))
-
-    (funcall fun)))
+  `((unless (harpoon-lsp--slow-server-p major-mode)
+      (setq-local completion-styles harpoon-lsp-completion-styles))
+    (,function)))
 
 ;;; -- Helpers
 
@@ -347,14 +367,17 @@ The message is formatted using optional ARGS."
   "Get the name of the target hook for MODE.
 
 The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
-  (let ((suffix (if harpoon "harpoon" "hook")))
+  (let* ((suffix (if harpoon "harpoon" "hook"))
+         (name (thread-first
+                 mode
+                 (harpoon--mode-name)
+                 (symbol-name)
+                 (concat "-" suffix)
+                 (intern))))
 
-    (thread-first
-      mode
-      (harpoon--mode-name)
-      (symbol-name)
-      (concat "-" suffix)
-      (intern))))
+    (harpoon--log "Creating function named `%s' for `%s'" name mode)
+
+    name))
 
 ;;; -- Treesit
 
@@ -461,38 +484,37 @@ The rest of the BODY will be spliced into the hook function."
      ,(format "Hook into `%s'." name)
      ,@(delete
         nil
-        `(,(when messages `(harpoon-message--in-a-bottle ',messages))
+        `(,(when messages
+             (harpoon--log "Will pick random message from [%s] for `%s'"
+                           (string-join messages "; ")
+                           name)
+             `(harpoon-message--in-a-bottle ',messages))
 
-          ,(cond
-            ((equal 'never tabs)
-             '(harpoon-tabs--disable))
-
-            ((equal 'always tabs)
-             '(harpoon-tabs--enable))
-
-            ((not tabs) nil)
-
-            (t
-             '(progn
-                (hack-local-variables)
-                (harpoon-tabs--maybe-enable))))
+          ,@(harpoon-tabs--setup tabs name)
 
           ,@(harpoon--safe-body body)
 
           ,(when-let ((checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
+             (harpoon--log "Setting up checker `%s' for `%s'" checker name)
              `(,checker))
-          ,(when lsp
-             `(harpoon-lsp--enable ',(harpoon--maybe-plist-get lsp :function)))
+          ,@(and-let* (lsp
+                       (fun (harpoon--maybe-plist-get lsp :function harpoon-lsp-function)))
+
+              (harpoon--log "Will set up LSP using function `%s' for `%s'" fun name)
+              (harpoon-lsp--setup fun))
           ,@(harpoon-completion--setup (or corfu completion) name)
           ,(when prog-like '(run-hooks 'harpoon-prog-like-hook))
           ,(when functions
+             (harpoon--log "Setting up functions %s for `%s'" functions name)
              `(progn ,@(mapcar (lambda (it)
                                  `(when (fboundp ',it) (,it)))
                                functions)))
           ,(when major
-             `(local-set-key
-               (kbd harpoon-major-key)
-               ',(intern (concat (symbol-name name) "-major"))))))))
+             (let ((key (intern (concat (symbol-name name) "-major"))))
+               (harpoon--log "Binding %s to `%s' for %s" harpoon-major-key key name)
+               `(local-set-key
+                 (kbd harpoon-major-key)
+                 ',key)))))))
 
 (cl-defmacro harpoon-hook (name)
   "Create the hook call for NAME."
@@ -511,13 +533,14 @@ LIGATURES is a list of strings that should be set using
 
     `(harpoon-ligatures--set-ligatures ',(harpoon--mode-name name) ',ligatures)))
 
-(cl-defmacro harpoon-lsp (&key lsp &allow-other-keys)
-  "Set up LSP.
+(cl-defmacro harpoon-lsp (name &key lsp &allow-other-keys)
+  "Set up LSP for NAME.
 
 LSP is either nil, t or a plist. If it is a plist, key
 `:ignore-dirs' can be used to add additional paths to variable
 `lsp-file-watch-ignored-directories'."
   (when-let ((dirs (harpoon--maybe-plist-get lsp :ignore-dirs)))
+    (harpoon--log "Will ignore directories %s for `%s'" dirs name)
     `(with-eval-after-load 'lsp-mode
        (when harpoon-lsp-dir-ignore-list
          (harpoon-lsp--ignore-directory ',(plist-get lsp :ignore-dirs)
@@ -531,8 +554,8 @@ LSP is either nil, t or a plist. If it is a plist, key
               (mode-name name)
               (ts-mode-name (harpoon-treesit--name name)))
 
+    (harpoon--log "Remapping `%s' to `%s'" mode-name ts-mode-name)
     `(progn
-       (message "Remapping %s to %s" ',mode-name ',ts-mode-name)
        (add-to-list 'major-mode-remap-alist ',(cons (harpoon-treesit--maybe-alias mode-name) ts-mode-name))
 
        (with-eval-after-load 'all-the-icons
@@ -560,7 +583,7 @@ See documentation of macros `harpoon-function',
 
      (harpoon-ligatures ,name ,@args)
 
-     (harpoon-lsp ,@args)
+     (harpoon-lsp ,name ,@args)
 
      (harpoon-treesit ,name)))
 

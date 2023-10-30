@@ -83,6 +83,11 @@ functions unless `:checker' is passed symbol `disabled'."
   :type 'boolean
   :group 'harpoon)
 
+(defcustom harpoon-suppress-warnings nil
+  "Whether to suppress warnings."
+  :type 'boolean
+  :group 'harpoon)
+
 ;;; -- Indentation
 
 (defun harpoon-disable-tabs ()
@@ -286,9 +291,10 @@ at or above it."
   "Warn about MESSAGE.
 
 The message is formatted using optional ARGS."
-  (let ((formatted (apply #'format (append (list message) args))))
+  (unless harpoon-suppress-warnings
+    (let ((formatted (apply #'format (append (list message) args))))
 
-    (display-warning 'harpoon formatted :warning)))
+      (display-warning 'harpoon formatted :warning))))
 
 (defun harpoon--log (fmt &rest args)
   "Use ARGS to format FMT if logging is enabled."

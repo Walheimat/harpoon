@@ -8,6 +8,8 @@
 
 (require 'harpoon nil t)
 
+(setq harpoon-suppress-warnings t)
+
 (ert-deftest harpoon-prog-like ()
   (bydi ((:mock run-hooks :with bydi-rf))
 
@@ -146,9 +148,10 @@
   (should-error (harpoon--modern-emacs-p "testing") :type 'user-error))
 
 (ert-deftest harpoon-warn--formats ()
-  (bydi (display-warning)
-    (harpoon--warn "This is a %s" "test")
-    (bydi-was-called-with display-warning (list 'harpoon "This is a test" :warning))))
+  (let ((harpoon-suppress-warnings nil))
+    (bydi (display-warning)
+      (harpoon--warn "This is a %s" "test")
+      (bydi-was-called-with display-warning (list 'harpoon "This is a test" :warning)))))
 
 (ert-deftest harpoon-log--formats ()
   (let ((harpoon-log nil))

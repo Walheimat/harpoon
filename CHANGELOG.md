@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Custom variable `harpoon-log` that when set to `t` will log
   information during macro expansion.
+- Warnings can now be suppressed when `harpoon-suppress-warnings` is
+  `t`.
 
 ## [v0.3.0]
 

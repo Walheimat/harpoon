@@ -90,7 +90,7 @@ functions unless `:checker' is passed symbol `disabled'."
 
 ;;; -- Indentation
 
-(defun harpoon-disable-tabs ()
+(defun harpoon-tabs--disable ()
   "Disable tabs.
 
 Sets variable `indent-tabs-mode' to nil."
@@ -98,7 +98,7 @@ Sets variable `indent-tabs-mode' to nil."
 
   (setq indent-tabs-mode nil))
 
-(defun harpoon-enable-tabs ()
+(defun harpoon-tabs--enable ()
   "Enable tabs.
 
 Sets tab variable `indent-tabs-mode' to t."
@@ -106,15 +106,15 @@ Sets tab variable `indent-tabs-mode' to t."
 
   (setq indent-tabs-mode t))
 
-(defun harpoon-maybe-enable-tabs ()
+(defun harpoon-tabs--maybe-enable ()
   "Maybe enable tabs."
   (if harpoon-prefer-tabs
-      (harpoon-enable-tabs)
-    (harpoon-disable-tabs)))
+      (harpoon-tabs--enable)
+    (harpoon-tabs--disable)))
 
 ;;; -- Completion
 
-(defun harpoon--completion-parse (values)
+(defun harpoon-completion--parse (values)
   "Parse VALUES for completion.
 
 This is either a plist or a cons of auto delay and auto prefix.
@@ -129,11 +129,11 @@ Return list of four."
           (or (car values) 0.2)
           (or (cadr values) 3))))
 
-(defun harpoon--completion (values name)
+(defun harpoon-completion--setup (values name)
   "Set delay and minimum prefix using VALUES for NAME."
   (cl-destructuring-bind
       (provider auto delay prefix)
-      (harpoon--completion-parse values)
+      (harpoon-completion--parse values)
     (harpoon--log
      "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
      provider name auto delay prefix)
@@ -149,7 +149,7 @@ Return list of four."
 
 ;;; -- Ligatures
 
-(defconst harpoon-common-ligatures
+(defconst harpoon-ligatures--common-ligatures
   '(
     "==" "!=" ">=" "<="        ; Comparison.
     "+=" "-=" "/=" "%=" "*="   ; Assignment.
@@ -162,37 +162,22 @@ Return list of four."
     )
   "A list of ligatures available in all programming modes.")
 
-(defun harpoon-set-ligatures (modes ligatures)
+(defun harpoon-ligatures--set-ligatures (modes ligatures)
   "Set LIGATURES for MODES.
 
-All ligatures in `harpoon-common-ligatures' will be appended to
+All ligatures in `harpoon-ligatures--common-ligatures' will be appended to
 LIGATURES."
   (declare-function ligature-set-ligatures "ext:ligature.el")
 
   (when (require 'ligature nil t)
-    (ligature-set-ligatures modes (append ligatures harpoon-common-ligatures))))
+    (ligature-set-ligatures modes (append ligatures harpoon-ligatures--common-ligatures))))
 
 ;;; -- Messages
 
-(defconst harpoon-ascii-blue-whale (propertize "}    , ﬞ   ⎠" 'face 'mode-line-emphasis)
+(defconst harpoon-message--ascii-blue-whale (propertize "}    , ﬞ   ⎠" 'face 'mode-line-emphasis)
   "A small, highlighted ASCII blue whale.")
 
-(defun harpoon-biased-random (limit &optional bias-low throws)
-  "Return a biased random number using LIMIT.
-
-The bias is the high end unless BIAS-LOW is passed. The number of
-throws are 3 or THROWS."
-  (let ((results (list))
-        (throws (or throws 3)))
-
-    (dotimes (_i throws)
-      (push (random limit) results))
-
-    (if bias-low
-        (seq-min results)
-      (seq-max results))))
-
-(defun harpoon-message-in-a-bottle (bottle &optional whale)
+(defun harpoon-message--in-a-bottle (bottle &optional whale)
   "Randomly display a message from the given BOTTLE.
 
 That bottle is just an array of strings.
@@ -200,8 +185,8 @@ That bottle is just an array of strings.
 WHALE is the string used to prefix the message with or the blue
 whale by default."
   (let* ((message-log-max nil) ; Don't clutter.
-         (message (nth (harpoon-biased-random (length bottle)) bottle))
-         (whale (or whale harpoon-ascii-blue-whale)))
+         (message (nth (harpoon--biased-random (length bottle)) bottle))
+         (whale (or whale harpoon-message--ascii-blue-whale)))
 
     (message (concat
               whale
@@ -210,21 +195,13 @@ whale by default."
 
 ;;; -- LSP
 
-(defun harpoon-lsp-ignore-directory--escape (dir)
+(defun harpoon-lsp--escape-ignore-directory (dir)
   "Escape directory DIR."
   (if (string-prefix-p "." dir)
       (concat "[/\\\\]\\" dir "\\'")
     (concat "[/\\\\]" dir "\\'")))
 
-(defun harpoon-append (target seq)
-  "Set TARGET to it with SEQ appended.
-
-Duplicate items are removed."
-  (let ((val (symbol-value target)))
-
-    (set target (delq nil (delete-dups (append val seq))))))
-
-(defun harpoon-lsp-ignore-directory (dir &optional ignore-list)
+(defun harpoon-lsp--ignore-directory (dir &optional ignore-list)
   "Make sure DIR is ignored.
 
 It can be either a list of strings or a single string.
@@ -235,20 +212,20 @@ the `harpoon-lsp-dir-ignore-list' is used."
 
     (thread-last
       dirs
-      (mapcar 'harpoon-lsp-ignore-directory--escape)
-      (harpoon-append (or ignore-list harpoon-lsp-dir-ignore-list)))))
+      (mapcar 'harpoon-lsp--escape-ignore-directory)
+      (harpoon--append (or ignore-list harpoon-lsp-dir-ignore-list)))))
 
-(defun harpoon-slow-lsp-p (mode)
+(defun harpoon-lsp--slow-server-p (mode)
   "Check if MODE is considered slow."
   (memq mode harpoon-lsp-slow-modes))
 
-(defun harpoon-lsp-enable (&optional function)
+(defun harpoon-lsp--enable (&optional function)
   "Defer LSP setup for the file.
 
 Sets up completion styles unless the mode is considered slow.
 This calls FUNCTION if it is non-nil, otherwise
 `harpoon-lsp-function' is used."
-  (unless (harpoon-slow-lsp-p major-mode)
+  (unless (harpoon-lsp--slow-server-p major-mode)
     (setq-local completion-styles harpoon-lsp-completion-styles))
 
   (when-let ((fun (or function harpoon-lsp-function)))
@@ -292,6 +269,38 @@ at or above it."
         (user-error "Provided minimum version not acceptable"))
     (>= emacs-major-version 28)))
 
+(defvar harpoon-prog-like-hook nil
+  "Commands that should be run for prog-like modes.")
+
+(defun harpoon-prog-like ()
+  "Run `prog-like-hook' functions."
+  (run-hooks 'harpoon-prog-like-hook))
+
+(defun harpoon--append (target seq)
+  "Set TARGET to it with SEQ appended.
+
+Duplicate items are removed."
+  (let ((val (symbol-value target)))
+
+    (set target (delq nil (delete-dups (append val seq))))))
+
+(defun harpoon--biased-random (limit &optional bias-low throws)
+  "Return a biased random number using LIMIT.
+
+The bias is the high end unless BIAS-LOW is passed. The number of
+throws are 3 or THROWS."
+  (let ((results (list))
+        (throws (or throws 3)))
+
+    (dotimes (_i throws)
+      (push (random limit) results))
+
+    (if bias-low
+        (seq-min results)
+      (seq-max results))))
+
+;;; -- IO
+
 (defun harpoon--warn (message &rest args)
   "Warn about MESSAGE.
 
@@ -305,13 +314,6 @@ The message is formatted using optional ARGS."
   "Use ARGS to format FMT if logging is enabled."
   (when harpoon-log
     (apply #'message fmt args)))
-
-(defvar harpoon-prog-like-hook nil
-  "Commands that should be run for prog-like modes.")
-
-(defun harpoon-prog-like ()
-  "Run `prog-like-hook' functions."
-  (run-hooks 'harpoon-prog-like-hook))
 
 ;;; -- Macro helpers
 
@@ -335,58 +337,10 @@ The message is formatted using optional ARGS."
            collect key
            and collect val))
 
-(defvar harpoon--treesit-modes '((js-mode . javascript)
-                                 (c++-mode . cpp)
-                                 (c-mode . c)
-                                 (python-mode . python)
-                                 (js-json-mode . json)
-                                 (yaml-mode . yaml)
-                                 (sh-mode . bash))
-  "Alist mapping languages to major modes.")
-
-(defvar harpoon--treesit-aliases '((js-mode . javascript-mode))
-  "Alist mapping modes to their alias.")
-
-(defvar harpoon--treesit-replacements '((js-json-mode . json-mode)
-                                        (sh-mode . bash-mode))
-  "Alist mapping modes to those replacing them.")
-
-(defun harpoon--treesit-ready-p (name)
-  "Check if treesit is available for NAME."
-  (and (harpoon--modern-emacs-p 29)
-       (require 'treesit nil t)
-       (treesit-available-p)
-       (treesit-ready-p (harpoon--treesit-language name) t)))
-
-(defun harpoon--treesit-language (name)
-  "Get language for NAME."
-  (cdr-safe (assoc name harpoon--treesit-modes)))
-
-(defun harpoon--treesit-maybe-alias (name)
-  "Get the potentially aliased mode name for NAME."
-  (or (cdr-safe (assoc name harpoon--treesit-aliases))
-      name))
-
-(defun harpoon--treesit-maybe-replace (name)
-  "Get the potentially replaced mode name for NAME."
-  (or (cdr-safe (assoc name harpoon--treesit-replacements))
-      name))
-
-(defun harpoon--treesit-name (name)
-  "Get treesit name for NAME."
-  (let* ((name (harpoon--treesit-maybe-replace name))
-         (segment (thread-first
-                    name
-                    (symbol-name)
-                    (split-string "-mode")
-                    (car))))
-
-    (intern (concat segment "-ts-mode"))))
-
 (defun harpoon--mode-name (name)
   "Get mode name for NAME."
-  (if-let* ((ready (harpoon--treesit-ready-p name)))
-      (harpoon--treesit-name name)
+  (if-let* ((ready (harpoon-treesit--ready-p name)))
+      (harpoon-treesit--name name)
     name))
 
 (defun harpoon--function-name (mode &optional harpoon)
@@ -401,6 +355,56 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
       (symbol-name)
       (concat "-" suffix)
       (intern))))
+
+;;; -- Treesit
+
+(defvar harpoon-treesit--modes '((js-mode . javascript)
+                                 (c++-mode . cpp)
+                                 (c-mode . c)
+                                 (python-mode . python)
+                                 (js-json-mode . json)
+                                 (yaml-mode . yaml)
+                                 (sh-mode . bash))
+  "Alist mapping languages to major modes.")
+
+(defvar harpoon-treesit--aliases '((js-mode . javascript-mode))
+  "Alist mapping modes to their alias.")
+
+(defvar harpoon-treesit--replacements '((js-json-mode . json-mode)
+                                        (sh-mode . bash-mode))
+  "Alist mapping modes to those replacing them.")
+
+(defun harpoon-treesit--ready-p (name)
+  "Check if treesit is available for NAME."
+  (and (harpoon--modern-emacs-p 29)
+       (require 'treesit nil t)
+       (treesit-available-p)
+       (treesit-ready-p (harpoon-treesit--language name) t)))
+
+(defun harpoon-treesit--language (name)
+  "Get language for NAME."
+  (cdr-safe (assoc name harpoon-treesit--modes)))
+
+(defun harpoon-treesit--maybe-alias (name)
+  "Get the potentially aliased mode name for NAME."
+  (or (cdr-safe (assoc name harpoon-treesit--aliases))
+      name))
+
+(defun harpoon-treesit--maybe-replace (name)
+  "Get the potentially replaced mode name for NAME."
+  (or (cdr-safe (assoc name harpoon-treesit--replacements))
+      name))
+
+(defun harpoon-treesit--name (name)
+  "Get treesit name for NAME."
+  (let* ((name (harpoon-treesit--maybe-replace name))
+         (segment (thread-first
+                    name
+                    (symbol-name)
+                    (split-string "-mode")
+                    (car))))
+
+    (intern (concat segment "-ts-mode"))))
 
 ;;; -- Macros
 
@@ -441,9 +445,9 @@ will run `prog-like-hook'.
 
 TABS is either nil, t, `always' or `never'. Nil (or missing)
 means: do nothing. The symbol t will call
-`harpoon-maybe-enable-tabs'; the symbol `always' will call
-`harpoon-enable-tabs' and the symbol `never' will call
-`harpoon-disable-tabs'.
+`harpoon-tabs--maybe-enable'; the symbol `always' will call
+`harpoon-tabs--enable' and the symbol `never' will call
+`harpoon-tabs--disable'.
 
 CHECKER is the function to call to enable a syntax checker.
 
@@ -457,29 +461,29 @@ The rest of the BODY will be spliced into the hook function."
      ,(format "Hook into `%s'." name)
      ,@(delete
         nil
-        `(,(when messages `(harpoon-message-in-a-bottle ',messages))
+        `(,(when messages `(harpoon-message--in-a-bottle ',messages))
 
           ,(cond
             ((equal 'never tabs)
-             '(harpoon-disable-tabs))
+             '(harpoon-tabs--disable))
 
             ((equal 'always tabs)
-             '(harpoon-enable-tabs))
+             '(harpoon-tabs--enable))
 
             ((not tabs) nil)
 
             (t
              '(progn
                 (hack-local-variables)
-                (harpoon-maybe-enable-tabs))))
+                (harpoon-tabs--maybe-enable))))
 
           ,@(harpoon--safe-body body)
 
           ,(when-let ((checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
              `(,checker))
           ,(when lsp
-             `(harpoon-lsp-enable ',(harpoon--maybe-plist-get lsp :function)))
-          ,@(harpoon--completion (or corfu completion) name)
+             `(harpoon-lsp--enable ',(harpoon--maybe-plist-get lsp :function)))
+          ,@(harpoon-completion--setup (or corfu completion) name)
           ,(when prog-like '(run-hooks 'harpoon-prog-like-hook))
           ,(when functions
              `(progn ,@(mapcar (lambda (it)
@@ -505,7 +509,7 @@ LIGATURES is a list of strings that should be set using
 
   (when-let ((non-empty ligatures))
 
-    `(harpoon-set-ligatures ',(harpoon--mode-name name) ',ligatures)))
+    `(harpoon-ligatures--set-ligatures ',(harpoon--mode-name name) ',ligatures)))
 
 (cl-defmacro harpoon-lsp (&key lsp &allow-other-keys)
   "Set up LSP.
@@ -516,20 +520,20 @@ LSP is either nil, t or a plist. If it is a plist, key
   (when-let ((dirs (harpoon--maybe-plist-get lsp :ignore-dirs)))
     `(with-eval-after-load 'lsp-mode
        (when harpoon-lsp-dir-ignore-list
-         (harpoon-lsp-ignore-directory ',(plist-get lsp :ignore-dirs)
+         (harpoon-lsp--ignore-directory ',(plist-get lsp :ignore-dirs)
                                        ',(plist-get lsp :dir-ignore-list))))))
 
 (cl-defmacro harpoon-treesit (name)
   "Remap mode NAME to tree-sitter variant if possible."
   (declare (indent defun))
 
-  (when-let* ((ready (harpoon--treesit-ready-p name))
+  (when-let* ((ready (harpoon-treesit--ready-p name))
               (mode-name name)
-              (ts-mode-name (harpoon--treesit-name name)))
+              (ts-mode-name (harpoon-treesit--name name)))
 
     `(progn
        (message "Remapping %s to %s" ',mode-name ',ts-mode-name)
-       (add-to-list 'major-mode-remap-alist ',(cons (harpoon--treesit-maybe-alias mode-name) ts-mode-name))
+       (add-to-list 'major-mode-remap-alist ',(cons (harpoon-treesit--maybe-alias mode-name) ts-mode-name))
 
        (with-eval-after-load 'all-the-icons
          (defvar all-the-icons-mode-icon-alist)

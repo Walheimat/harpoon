@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `t`.
 - The completion setup is now logged when `harpoon-log` is set to `t`.
 
+### Fixed
+
+- Completion now defaults for old cons format.
+
 ## [v0.3.0]
 
 ### Added

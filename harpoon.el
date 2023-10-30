@@ -126,8 +126,8 @@ Return list of four."
             (harpoon--maybe-plist-get values :prefix 3))
     (list harpoon-completion-provider
           t
-          (car values)
-          (cadr values))))
+          (or (car values) 0.2)
+          (or (cadr values) 3))))
 
 (defun harpoon--completion (values name)
   "Set delay and minimum prefix using VALUES for NAME."

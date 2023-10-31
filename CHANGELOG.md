@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Keyword `:major` was replaced by `:bind`. Variable
   `harpoon-major-key` was replaced by `harpoon-bind-key`.
+- Custom variable `harpoon-prefer-tabs` was renamed to
+  `harpoon-tabs-prefer`.
 
 ## [v0.3.1]
 

@@ -178,7 +178,7 @@
 
 (ert-deftest harpoon-tabs--maybe-enable--enables-if-tabs-preferred ()
   (with-temp-buffer
-    (setq-local harpoon-prefer-tabs t)
+    (setq-local harpoon-tabs-prefer t)
 
     (harpoon-tabs--maybe-enable)
 
@@ -186,7 +186,7 @@
 
 (ert-deftest harpoon-tabs--maybe-enable--disables-unless-preferred ()
   (with-temp-buffer
-    (setq-local harpoon-prefer-tabs nil)
+    (setq-local harpoon-tabs-prefer nil)
 
     (harpoon-tabs--maybe-enable)
 

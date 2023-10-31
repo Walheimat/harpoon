@@ -23,7 +23,7 @@
   "Harpoon settings."
   :group 'harpoon)
 
-(defcustom harpoon-prefer-tabs nil
+(defcustom harpoon-tabs-prefer nil
   "Whether tabs are preferred for indentation.
 
 `harpoon' will make sure that directory-local settings are
@@ -106,21 +106,17 @@ The logging is done to buffer `harpoon-log--buffer'."
   "Disable tabs.
 
 Sets variable `indent-tabs-mode' to nil."
-  (interactive "p")
-
   (setq indent-tabs-mode nil))
 
 (defun harpoon-tabs--enable ()
   "Enable tabs.
 
 Sets tab variable `indent-tabs-mode' to t."
-  (interactive)
-
   (setq indent-tabs-mode t))
 
 (defun harpoon-tabs--maybe-enable ()
   "Maybe enable tabs."
-  (if harpoon-prefer-tabs
+  (if harpoon-tabs-prefer
       (harpoon-tabs--enable)
     (harpoon-tabs--disable)))
 

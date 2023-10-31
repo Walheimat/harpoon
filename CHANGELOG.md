@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Variables `harpoon-bind-name-suffix` and `harpoon-bind-function`.
   The latter will be called to construct a symbol to bind to the
   prefix key. The function by default constructs it using the prior.
+- Keyword `:bind` now accepts a symbol that will be bound to
+  (superseding its construction).
 
 ### Changed
 

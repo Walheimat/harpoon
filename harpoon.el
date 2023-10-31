@@ -487,8 +487,9 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &allow-other-keys)
   "Create hook function for NAME.
 
-BIND (or MAJOR) is either t or nil. If it is t, a prefixed
-function will be mapped to the major key.
+BIND (or MAJOR) is either a symbol, t or nil. If it is a symbol,
+the `harpoon-bind-key' will be bound to it. If it is t, a symbol
+yielded from `harpoon-bind-function' will be bound instead.
 
 COMPLETION (or CORFU) is a list of (IDLE-DELAY PREFIX-LENGTH).
 
@@ -551,8 +552,12 @@ The rest of the BODY will be spliced into the hook function."
              `(progn ,@(mapcar (lambda (it)
                                  `(when (fboundp ',it) (,it)))
                                functions)))
-          ,(when (or major bind)
-             (let ((key (funcall harpoon-bind-function name)))
+          ,(when-let ((setting (or major bind)))
+             (let ((key (cond
+                         ((booleanp setting)
+                          (funcall harpoon-bind-function name))
+                         ((symbolp setting)
+                          setting))))
                (harpoon--log "Binding %s to `%s' for `%s'" harpoon-bind-key key name)
                `(local-set-key
                  (kbd harpoon-bind-key)

@@ -336,6 +336,16 @@
        (kbd harpoon-bind-key)
        'test-mode-harpoon-bind))))
 
+(ert-deftest harpoon-function--bind-symbol ()
+  (bydi-match-expansion
+   (harpoon-function test-mode
+     :bind test-fun)
+   '(defun test-mode-harpoon ()
+      "Hook into `test-mode'."
+      (local-set-key
+       (kbd harpoon-bind-key)
+       'test-fun))))
+
 (ert-deftest harpoon-function--checker ()
   (bydi-match-expansion
    (harpoon-function test-mode

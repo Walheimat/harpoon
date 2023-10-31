@@ -73,17 +73,17 @@ functions unless `:checker' is passed symbol `disabled'."
   :type 'symbol
   :group 'harpoon)
 
-(defcustom harpoon-keymap-prefix "C-c h"
-  "The key combination to use for a `major-mode' keymap."
+(defcustom harpoon-bind-key "C-c h"
+  "The key combination to use for a `major-mode' binding."
   :type 'key-sequence
   :group 'harpoon)
 
-(defcustom harpoon-keymap-name-suffix "-harpoon-map"
+(defcustom harpoon-bind-name-suffix "-harpoon-bind"
   "The name to use when constructing a symbol to bind to."
   :type 'string
   :group 'harpoon)
 
-(defcustom harpoon-keymap-function 'harpoon-keymap--construct
+(defcustom harpoon-bind-function 'harpoon-bind--construct
   "Function to create a symbol to bind to."
   :type 'function
   :group 'harpoon)
@@ -370,7 +370,7 @@ The message is formatted using optional ARGS."
 
 (defvar harpoon--keywords
   '(:major
-    :keymap
+    :bind
     :corfu
     :completion
     :functions
@@ -461,11 +461,11 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
 
     (intern (concat segment "-ts-mode"))))
 
-;;; -- Keymap
+;;; -- Binding
 
-(defun harpoon-keymap--construct (name)
+(defun harpoon-bind--construct (name)
   "Construct a symbol for NAME."
-  (intern (concat (symbol-name name) harpoon-keymap-name-suffix)))
+  (intern (concat (symbol-name name) harpoon-bind-name-suffix)))
 
 ;;; -- Macros
 
@@ -474,7 +474,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &body
      body
      &key
-     keymap
+     bind
      major
      corfu
      completion
@@ -487,7 +487,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &allow-other-keys)
   "Create hook function for NAME.
 
-KEYMAP (or MAJOR) is either t or nil. If it is t, a prefixed
+BIND (or MAJOR) is either t or nil. If it is t, a prefixed
 function will be mapped to the major key.
 
 COMPLETION (or CORFU) is a list of (IDLE-DELAY PREFIX-LENGTH).
@@ -551,11 +551,11 @@ The rest of the BODY will be spliced into the hook function."
              `(progn ,@(mapcar (lambda (it)
                                  `(when (fboundp ',it) (,it)))
                                functions)))
-          ,(when (or major keymap)
-             (let ((key (funcall harpoon-keymap-function name)))
-               (harpoon--log "Binding %s to `%s' for `%s'" harpoon-keymap-prefix key name)
+          ,(when (or major bind)
+             (let ((key (funcall harpoon-bind-function name)))
+               (harpoon--log "Binding %s to `%s' for `%s'" harpoon-bind-key key name)
                `(local-set-key
-                 (kbd harpoon-keymap-prefix)
+                 (kbd harpoon-bind-key)
                  ',key)))))))
 
 (cl-defmacro harpoon-hook (name)

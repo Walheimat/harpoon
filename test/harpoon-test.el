@@ -326,15 +326,15 @@
       (message "hi")
       (run-hooks 'harpoon-prog-like-hook))))
 
-(ert-deftest harpoon-function--keymap ()
+(ert-deftest harpoon-function--bind ()
   (bydi-match-expansion
    (harpoon-function test-mode
-     :keymap t)
+     :bind t)
    '(defun test-mode-harpoon ()
       "Hook into `test-mode'."
       (local-set-key
-       (kbd harpoon-keymap-prefix)
-       'test-mode-harpoon-map))))
+       (kbd harpoon-bind-key)
+       'test-mode-harpoon-bind))))
 
 (ert-deftest harpoon-function--checker ()
   (bydi-match-expansion
@@ -397,7 +397,7 @@
                       corfu-auto-prefix 4
                       corfu-auto t)
           (local-set-key (kbd "C-M-i") #'completion-at-point)
-          (local-set-key (kbd harpoon-keymap-prefix) 'test-mode-harpoon-map)))
+          (local-set-key (kbd harpoon-bind-key) 'test-mode-harpoon-bind)))
 
       (bydi-was-called-n-times harpoon--warn 4))))
 

@@ -9,15 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Variables `harpoon-keymap-name-suffix` and
-  `harpoon-keymap-function`. The latter will be called to construct a
-  symbol to bind to the prefix key. The function by default constructs
-  it using the prior.
+- Variables `harpoon-bind-name-suffix` and `harpoon-bind-function`.
+  The latter will be called to construct a symbol to bind to the
+  prefix key. The function by default constructs it using the prior.
 
 ### Changed
 
-- Keyword `:major` was replaced by `:keymap`. Variable
-  `harpoon-major-key` was replaced by `harpoon-keymap-prefix`.
+- Keyword `:major` was replaced by `:bind`. Variable
+  `harpoon-major-key` was replaced by `harpoon-bind-key`.
 
 ## [v0.3.1]
 

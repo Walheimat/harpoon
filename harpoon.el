@@ -120,24 +120,6 @@ Sets tab variable `indent-tabs-mode' to t."
       (harpoon-tabs--enable)
     (harpoon-tabs--disable)))
 
-(defun harpoon-tabs--setup (tabs name)
-  "Setup TABS for NAME."
-  (cond
-   ((equal 'never tabs)
-    (harpoon--log "No tabs will be used for `%s'" name)
-    '((harpoon-tabs--disable)))
-
-   ((equal 'always tabs)
-    (harpoon--log "Tabs will be used for `%s'" name)
-    '((harpoon-tabs--enable)))
-
-   ((not tabs) nil)
-
-   (t
-    (harpoon--log "Tabs will be used conditionally for `%s'" name)
-    '((hack-local-variables)
-      (harpoon-tabs--maybe-enable)))))
-
 ;;; -- Completion
 
 (defun harpoon-completion--parse (values)
@@ -531,7 +513,21 @@ The rest of the BODY will be spliced into the hook function."
                            name)
              `(harpoon-message--in-a-bottle ',messages))
 
-          ,@(harpoon-tabs--setup tabs name)
+          ,@(cond
+             ((equal 'never tabs)
+              (harpoon--log "No tabs will be used for `%s'" name)
+              '((harpoon-tabs--disable)))
+
+             ((equal 'always tabs)
+              (harpoon--log "Tabs will be used for `%s'" name)
+              '((harpoon-tabs--enable)))
+
+             ((not tabs) nil)
+
+             (t
+              (harpoon--log "Tabs will be used conditionally for `%s'" name)
+              '((hack-local-variables)
+                (harpoon-tabs--maybe-enable))))
 
           ,@(harpoon--safe-body body)
 

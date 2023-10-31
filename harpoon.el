@@ -297,13 +297,6 @@ at or above it."
         (user-error "Provided minimum version not acceptable"))
     (>= emacs-major-version 28)))
 
-(defvar harpoon-prog-like-hook nil
-  "Commands that should be run for prog-like modes.")
-
-(defun harpoon-prog-like ()
-  "Run `prog-like-hook' functions."
-  (run-hooks 'harpoon-prog-like-hook))
-
 (defun harpoon--append (target seq)
   "Set TARGET to it with SEQ appended.
 
@@ -326,6 +319,15 @@ throws are 3 or THROWS."
     (if bias-low
         (seq-min results)
       (seq-max results))))
+
+;;; -- Prog-like
+
+(defvar harpoon-prog-like-hook nil
+  "Commands that should be run for prog-like modes.")
+
+(defun harpoon-prog-like ()
+  "Run `prog-like-hook' functions."
+  (run-hooks 'harpoon-prog-like-hook))
 
 ;;; -- IO
 
@@ -542,7 +544,9 @@ The rest of the BODY will be spliced into the hook function."
               (harpoon--log "Will set up LSP using function `%s' for `%s'" fun name)
               (harpoon-lsp--setup fun))
           ,@(harpoon-completion--setup (or corfu completion) name)
-          ,(when prog-like '(run-hooks 'harpoon-prog-like-hook))
+          ,(when prog-like
+             (harpoon--log "Will run `prog-like-hook' for `%s'" name)
+             '(run-hooks 'harpoon-prog-like-hook))
           ,(when functions
              (harpoon--log "Setting up functions %s for `%s'" functions name)
              `(progn ,@(mapcar (lambda (it)

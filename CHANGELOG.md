@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Custom variable `harpoon-log` that when set to `t` will log
-  information during macro expansion.
+  information during macro expansion to a custom log buffer (that can
+  be switched to using `harpoon-pop-to-log-buffer`.
 - Warnings can now be suppressed when `harpoon-suppress-warnings` is
   `t`.
 

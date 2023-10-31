@@ -79,7 +79,9 @@ functions unless `:checker' is passed symbol `disabled'."
   :group 'harpoon)
 
 (defcustom harpoon-log nil
-  "Whether to log during macro expansion."
+  "Whether to log during macro expansion.
+
+The logging is done to buffer `harpoon-log--buffer'."
   :type 'boolean
   :group 'harpoon)
 
@@ -330,10 +332,29 @@ The message is formatted using optional ARGS."
 
       (display-warning 'harpoon formatted :warning))))
 
-(defun harpoon--log (fmt &rest args)
+(defvar harpoon-log--buffer " *harpoon*")
+
+(defun harpoon-log--insert (fmt &rest args)
   "Use ARGS to format FMT if logging is enabled."
   (when harpoon-log
-    (apply #'message fmt args)))
+    (let ((buffer (get-buffer harpoon-log--buffer))
+          (inhibit-read-only t))
+
+      (unless buffer
+        (setq buffer (get-buffer-create harpoon-log--buffer))
+        (with-current-buffer buffer
+          (view-mode)))
+
+      (with-current-buffer buffer
+        (goto-char (point-max))
+        (insert (apply #'format fmt args))
+        (insert "\n")))))
+
+(defun harpoon-log--insert-indented (fmt &rest args)
+  "Use ARGS to format FMT but indent."
+  (apply #'harpoon-log--insert (concat "\t" fmt) args))
+
+(defalias 'harpoon--log 'harpoon-log--insert-indented)
 
 ;;; -- Macro helpers
 
@@ -576,6 +597,9 @@ The ARGS are a keyword plist provided to sub-macros.
 See documentation of macros `harpoon-function',
 `harpoon-ligatures' and `harpoon-lsp' for the available keywords."
   (declare (indent defun))
+
+  (harpoon-log--insert "\nSetting up `%s'" name)
+
   `(progn
      (harpoon-function ,name ,@args)
 
@@ -586,6 +610,17 @@ See documentation of macros `harpoon-function',
      (harpoon-lsp ,name ,@args)
 
      (harpoon-treesit ,name)))
+
+(defun harpoon-pop-to-logs ()
+  "Switch to the log buffer."
+  (interactive)
+
+  (let ((buffer (get-buffer harpoon-log--buffer)))
+
+    (unless buffer
+      (user-error "You need to set `harpoon-log' to t first"))
+
+    (pop-to-buffer (get-buffer harpoon-log--buffer))))
 
 (provide 'harpoon)
 

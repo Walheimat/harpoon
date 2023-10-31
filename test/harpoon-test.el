@@ -117,16 +117,29 @@
 (ert-deftest harpoon-log--formats ()
   (let ((harpoon-log nil))
 
-    (bydi (message)
-      (harpoon--log "This is a %s" "test")
+    (harpoon-log--insert "This is a %s" "test")
 
-      (bydi-was-not-called message)
+    (should-not (get-buffer harpoon-log--buffer))
 
-      (setq harpoon-log t)
+    (setq harpoon-log t)
 
-      (harpoon--log "This is a %s" "test")
+    (harpoon-log--insert "This is the %s message" "first")
+    (harpoon-log--insert "This %s the %s message" "will be" "second")
 
-      (bydi-was-called-with message (list "This is a %s" "test")))))
+    (with-current-buffer (get-buffer harpoon-log--buffer)
+      (should (string= (buffer-string)
+                       "This is the first message\nThis will be the second message\n")))))
+
+(ert-deftest harpoon-pop-to-logs ()
+  (bydi (pop-to-buffer)
+    (harpoon--log "Make sure it exists")
+
+    (harpoon-pop-to-logs)
+    (bydi-was-called pop-to-buffer)
+
+    (kill-buffer harpoon-log--buffer)
+
+    (should-error (harpoon-pop-to-logs))))
 
 (defvar test-target nil)
 

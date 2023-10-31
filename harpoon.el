@@ -73,9 +73,19 @@ functions unless `:checker' is passed symbol `disabled'."
   :type 'symbol
   :group 'harpoon)
 
-(defcustom harpoon-major-key "C-c h"
+(defcustom harpoon-keymap-prefix "C-c h"
   "The key combination to use for a `major-mode' keymap."
   :type 'key-sequence
+  :group 'harpoon)
+
+(defcustom harpoon-keymap-name-suffix "-harpoon-map"
+  "The name to use when constructing a symbol to bind to."
+  :type 'string
+  :group 'harpoon)
+
+(defcustom harpoon-keymap-function 'harpoon-keymap--construct
+  "Function to create a symbol to bind to."
+  :type 'function
   :group 'harpoon)
 
 (defcustom harpoon-log nil
@@ -360,6 +370,7 @@ The message is formatted using optional ARGS."
 
 (defvar harpoon--keywords
   '(:major
+    :keymap
     :corfu
     :completion
     :functions
@@ -450,6 +461,12 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
 
     (intern (concat segment "-ts-mode"))))
 
+;;; -- Keymap
+
+(defun harpoon-keymap--construct (name)
+  "Construct a symbol for NAME."
+  (intern (concat (symbol-name name) harpoon-keymap-name-suffix)))
+
 ;;; -- Macros
 
 (cl-defmacro harpoon-function
@@ -457,6 +474,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &body
      body
      &key
+     keymap
      major
      corfu
      completion
@@ -469,8 +487,8 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &allow-other-keys)
   "Create hook function for NAME.
 
-MAJOR is either t or nil. If it is t, a prefixed function
-will be mapped to the major key.
+KEYMAP (or MAJOR) is either t or nil. If it is t, a prefixed
+function will be mapped to the major key.
 
 COMPLETION (or CORFU) is a list of (IDLE-DELAY PREFIX-LENGTH).
 
@@ -499,7 +517,10 @@ The rest of the BODY will be spliced into the hook function."
   (declare (indent defun))
 
   (when corfu
-    (harpoon--warn "Using deprecated keyword corfu, use completion instead"))
+    (harpoon--warn "Using deprecated keyword `:corfu', use completion instead"))
+
+  (when major
+    (harpoon--warn "Using deprecated keyword `:major', use `:keymap' instead"))
 
   `(defun ,(harpoon--function-name name t) ()
      ,(format "Hook into `%s'." name)
@@ -530,11 +551,11 @@ The rest of the BODY will be spliced into the hook function."
              `(progn ,@(mapcar (lambda (it)
                                  `(when (fboundp ',it) (,it)))
                                functions)))
-          ,(when major
-             (let ((key (intern (concat (symbol-name name) "-major"))))
-               (harpoon--log "Binding %s to `%s' for %s" harpoon-major-key key name)
+          ,(when (or major keymap)
+             (let ((key (funcall harpoon-keymap-function name)))
+               (harpoon--log "Binding %s to `%s' for `%s'" harpoon-keymap-prefix key name)
                `(local-set-key
-                 (kbd harpoon-major-key)
+                 (kbd harpoon-keymap-prefix)
                  ',key)))))))
 
 (cl-defmacro harpoon-hook (name)

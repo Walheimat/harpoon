@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Variables `harpoon-keymap-name-suffix` and
+  `harpoon-keymap-function`. The latter will be called to construct a
+  symbol to bind to the prefix key. The function by default constructs
+  it using the prior.
+
+### Changed
+
+- Keyword `:major` was replaced by `:keymap`. Variable
+  `harpoon-major-key` was replaced by `harpoon-keymap-prefix`.
+
 ## [v0.3.1]
 
 ### Added

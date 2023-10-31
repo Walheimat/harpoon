@@ -29,7 +29,6 @@
       (should-not (harpoon-treesit--ready-p 'zest-mode))
       (should-not (harpoon-treesit--ready-p 'no-mapping-mode)))))
 
-
 (ert-deftest harpoon-ligatures--set-ligatures ()
   (defvar harpoon-ligatures--common-ligatures)
 
@@ -327,17 +326,15 @@
       (message "hi")
       (run-hooks 'harpoon-prog-like-hook))))
 
-(ert-deftest harpoon-function--major ()
+(ert-deftest harpoon-function--keymap ()
   (bydi-match-expansion
    (harpoon-function test-mode
-     :messages ("Just testing")
-     :major t
-     (message "hi"))
-   `(defun test-mode-harpoon ()
+     :keymap t)
+   '(defun test-mode-harpoon ()
       "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
-      (message "hi")
-      (local-set-key (kbd harpoon-major-key) 'test-mode-major))))
+      (local-set-key
+       (kbd harpoon-keymap-prefix)
+       'test-mode-harpoon-map))))
 
 (ert-deftest harpoon-function--checker ()
   (bydi-match-expansion
@@ -383,13 +380,14 @@
                     corfu-auto t)
         (local-set-key (kbd "C-M-i") #'completion-at-point)))))
 
-(ert-deftest harpoon-completion--setup-warns ()
+(ert-deftest harpoon--warns-about-deprecated-keywords ()
   (let ((harpoon-completion-provider 'corfu))
     (bydi (harpoon--warn)
       (bydi-match-expansion
        (harpoon-function test-mode
          :messages ("Just testing")
          :corfu (0.2 4)
+         :major t
          (message "hi"))
        `(defun test-mode-harpoon ()
           "Hook into `test-mode'."
@@ -398,9 +396,10 @@
           (setq-local corfu-auto-delay 0.2
                       corfu-auto-prefix 4
                       corfu-auto t)
-          (local-set-key (kbd "C-M-i") #'completion-at-point)))
+          (local-set-key (kbd "C-M-i") #'completion-at-point)
+          (local-set-key (kbd harpoon-keymap-prefix) 'test-mode-harpoon-map)))
 
-      (bydi-was-called harpoon--warn))))
+      (bydi-was-called-n-times harpoon--warn 4))))
 
 (ert-deftest harpoon--functions ()
   (let ((harpoon-completion-provider nil))

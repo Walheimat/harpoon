@@ -31,7 +31,7 @@ Let's take a look at a form using all currently available features.
 
 #+begin_src emacs-lisp
 (harpoon some-mode
-  :major t
+  :keymap t
   :completion (:provider corfu :auto t :prefix 1 :delay 0.1)
   :functions (some-fun other-fun)
   :ligatures ("::" ">>")

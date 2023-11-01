@@ -31,7 +31,7 @@ Let's take a look at a form using all currently available features.
 
 #+begin_src emacs-lisp
 (harpoon some-mode
-  :keymap t
+  :bind t
   :completion (:provider corfu :auto t :prefix 1 :delay 0.1)
   :functions (some-fun other-fun)
   :ligatures ("::" ">>")
@@ -45,14 +45,16 @@ Let's take a look at a form using all currently available features.
   (setq some-other-var t))
 #+end_src
 
-Setting =:major t= will bind the value of =harpoon-major-key= to a
-symbol named =some-mode-major=. In my configuration, this is a
-=transient= map for the current =major-mode= and probably not relevant
-to anyone else.
+Setting =:bind t= will bind the value of =harpoon-bind-key= to a
+symbol named =some-mode-<harpoon-bind-name-suffix>= . In my
+configuration I set =harpoon-bind-name-suffix= to "-major"; this is a
+=transient= map for the current =major-mode=. You can also pass a
+symbol that will be bound.
 
-The setting for =:completion= is a plist configuring =corfu= to enable
-automatic completion with a prefix length of 1 and a delay of 0.1.
-Note that currently only =corfu= completion is supported.
+The setting for =:completion= is a plist configuring the
+=harpoon-completion-provider= (only =corfu= is currently supported) to
+enable automatic completion with a prefix length of 1 and a delay of
+0.1.
 
 The list of symbols passed to =:functions= are called on the condition
 that they are bound when =some-mode= is enabled.
@@ -61,11 +63,12 @@ The list of strings passed to =:ligatures= will be set for =some-mode=
 using package =ligature= provided it can be required. Have a look at
 =harpoon-common-ligatures= for a list of ligatures always set up.
 
-The plist passed to =:lsp= configures =lsp-mode= to add directory
-".bucket" to its ignore list and call =lsp-deferred= when =some-mode=
-is enabled. Note that you don't need to set =:function= if you set
-=harpoon-lsp-function=, but you could set =eglot-ensure= here instead
-to have some other mode use that.
+The plist passed to =:lsp= will add directory ".bucket" to a ignore
+list and call =lsp-deferred= when =some-mode= is enabled. Note that
+you don't need to set =:function= if you set =harpoon-lsp-function=,
+but you could set =eglot-ensure= here instead to have some other mode
+use that. The ignore list will default to
+=harpoon-lsp-dir-ignore-list=.
 
 Entries in the list of strings passed to =:messages= will be displayed
 randomly when =some-mode= is enabled.
@@ -99,6 +102,10 @@ have the grammar for JavaScript, for example, and set up =harpoon= for
 pattern for mode => language, and mode => treesitter variant isn't
 uniform, this currently only works for a small number of
 modes/languages.
+
+You can set =harpoon-log= to =t= in your init file if you want to see
+what expanding your =harpoon= form(s) did. You can switch to the logs
+using =harpoon-pop-to-logs=.
 
 Please also have a look, again, at my [[https://github.com/Walheimat/wal-emacs][configuration]] for usage
 examples.

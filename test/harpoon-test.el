@@ -46,19 +46,9 @@
     (should (equal '(corfu t 2.1 4)
                    (harpoon-completion--parse (list 2.1 4))))))
 
-(ert-deftest harpoon-completion--setup--sets-corfu-using-plist ()
+(ert-deftest harpoon-completion--parse--sets-corfu-using-plist ()
   (should (equal '(corfu nil 0.1 5)
                  (harpoon-completion--parse '(:provider corfu :auto nil :delay 0.1 :prefix 5)))))
-
-(ert-deftest harpoon-completion--setup--warns ()
-  (let ((harpoon-completion-provider 'none)
-        (harpoon-suppress-warnings nil))
-
-    (bydi (harpoon--warn)
-
-      (harpoon-completion--setup (list 1 2) 'some-name)
-
-      (bydi-was-called-with harpoon--warn (list "Completion provider '%s' is not handled" 'none)))))
 
 (ert-deftest harpoon-lsp--slow-server-p ()
   (let ((harpoon-lsp-slow-modes '(test-mode)))

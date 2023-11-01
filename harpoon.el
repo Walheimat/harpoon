@@ -137,24 +137,6 @@ Return list of four."
           (or (car values) 0.2)
           (or (cadr values) 3))))
 
-(defun harpoon-completion--setup (values name)
-  "Set delay and minimum prefix using VALUES for NAME."
-  (cl-destructuring-bind
-      (provider auto delay prefix)
-      (harpoon-completion--parse values)
-    (harpoon--log
-     "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
-     provider name auto delay prefix)
-    (pcase provider
-      ('corfu
-       `((setq-local corfu-auto-delay ,delay
-                     corfu-auto-prefix ,prefix
-                     corfu-auto ,auto)
-         (local-set-key (kbd "C-M-i") #'completion-at-point)))
-      (_
-       (harpoon--warn "Completion provider '%s' is not handled" provider)
-       nil))))
-
 ;;; -- Ligatures
 
 (defconst harpoon-ligatures--common-ligatures
@@ -231,16 +213,6 @@ the `harpoon-lsp-dir-ignore-list' is used."
 (defun harpoon-lsp--slow-server-p (mode)
   "Check if MODE is considered slow."
   (memq mode harpoon-lsp-slow-modes))
-
-(defun harpoon-lsp--setup (function)
-  "Defer LSP setup for the file.
-
-Sets up completion styles unless the mode is considered slow.
-This calls FUNCTION if it is non-nil, otherwise
-`harpoon-lsp-function' is used."
-  `((unless (harpoon-lsp--slow-server-p major-mode)
-      (setq-local completion-styles harpoon-lsp-completion-styles))
-    (,function)))
 
 ;;; -- Helpers
 
@@ -500,7 +472,7 @@ The rest of the BODY will be spliced into the hook function."
   (declare (indent defun))
 
   (when corfu
-    (harpoon--warn "Using deprecated keyword `:corfu', use completion instead"))
+    (harpoon--warn "Using deprecated keyword `:corfu', use `:completion' instead"))
 
   (when major
     (harpoon--warn "Using deprecated keyword `:major', use `:keymap' instead"))
@@ -509,12 +481,14 @@ The rest of the BODY will be spliced into the hook function."
      ,(format "Hook into `%s'." name)
      ,@(delete
         nil
-        `(,(when messages
+        `(;; Messages.
+          ,(when messages
              (harpoon--log "Will pick random message from [%s] for `%s'"
                            (string-join messages "; ")
                            name)
              `(harpoon-message--in-a-bottle ',messages))
 
+          ;; Indentation.
           ,@(cond
              ((equal 'never tabs)
               (harpoon--log "No tabs will be used for `%s'" name)
@@ -531,8 +505,10 @@ The rest of the BODY will be spliced into the hook function."
               '((hack-local-variables)
                 (harpoon-tabs--maybe-enable))))
 
+          ;; Splice in the body.
           ,@(harpoon--safe-body body)
 
+          ;; Checker.
           ,(when-let ((checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
              (harpoon--log "Setting up checker `%s' for `%s'" checker name)
              `(,checker))
@@ -540,16 +516,40 @@ The rest of the BODY will be spliced into the hook function."
                        (fun (harpoon--maybe-plist-get lsp :function harpoon-lsp-function)))
 
               (harpoon--log "Will set up LSP using function `%s' for `%s'" fun name)
-              (harpoon-lsp--setup fun))
-          ,@(harpoon-completion--setup (or corfu completion) name)
+              `((unless (harpoon-lsp--slow-server-p major-mode)
+                  (setq-local completion-styles harpoon-lsp-completion-styles))
+                (,fun)))
+
+          ;; Completion.
+          ,@(cl-destructuring-bind
+                (provider auto delay prefix)
+                (harpoon-completion--parse (or corfu completion))
+              (harpoon--log
+               "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
+               provider name auto delay prefix)
+              (pcase provider
+                ('corfu
+                 `((setq-local corfu-auto-delay ,delay
+                               corfu-auto-prefix ,prefix
+                               corfu-auto ,auto)
+                   (local-set-key (kbd "C-M-i") #'completion-at-point)))
+                (_
+                 (harpoon--warn "Completion provider '%s' is not handled" provider)
+                 nil)))
+
+          ;; Prog-like.
           ,(when prog-like
              (harpoon--log "Will run `prog-like-hook' for `%s'" name)
              '(run-hooks 'harpoon-prog-like-hook))
+
+          ;; Functions.
           ,(when functions
              (harpoon--log "Setting up functions %s for `%s'" functions name)
              `(progn ,@(mapcar (lambda (it)
                                  `(when (fboundp ',it) (,it)))
                                functions)))
+
+          ;; Binding.
           ,(when-let ((setting (or major bind)))
              (let ((key (cond
                          ((booleanp setting)

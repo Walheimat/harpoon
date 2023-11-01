@@ -380,27 +380,6 @@
                     corfu-auto t)
         (local-set-key (kbd "C-M-i") #'completion-at-point)))))
 
-(ert-deftest harpoon--warns-about-deprecated-keywords ()
-  (let ((harpoon-completion-provider 'corfu))
-    (bydi (harpoon--warn)
-      (bydi-match-expansion
-       (harpoon-function test-mode
-         :messages ("Just testing")
-         :corfu (0.2 4)
-         :major t
-         (message "hi"))
-       `(defun test-mode-harpoon ()
-          "Hook into `test-mode'."
-          (harpoon-message--in-a-bottle '("Just testing"))
-          (message "hi")
-          (setq-local corfu-auto-delay 0.2
-                      corfu-auto-prefix 4
-                      corfu-auto t)
-          (local-set-key (kbd "C-M-i") #'completion-at-point)
-          (local-set-key (kbd harpoon-bind-key) 'test-mode-harpoon-bind)))
-
-      (bydi-was-called-n-times harpoon--warn 4))))
-
 (ert-deftest harpoon--functions ()
   (let ((harpoon-completion-provider nil))
     (bydi-match-expansion

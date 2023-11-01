@@ -323,9 +323,7 @@ The message is formatted using optional ARGS."
 ;;; -- Macro helpers
 
 (defvar harpoon--keywords
-  '(:major
-    :bind
-    :corfu
+  '(:bind
     :completion
     :functions
     :ligatures
@@ -470,12 +468,6 @@ CHECKER is the function to call to enable a syntax checker.
 
 The rest of the BODY will be spliced into the hook function."
   (declare (indent defun))
-
-  (when corfu
-    (harpoon--warn "Using deprecated keyword `:corfu', use `:completion' instead"))
-
-  (when major
-    (harpoon--warn "Using deprecated keyword `:major', use `:keymap' instead"))
 
   `(defun ,(harpoon--function-name name t) ()
      ,(format "Hook into `%s'." name)

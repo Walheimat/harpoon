@@ -246,7 +246,7 @@ This calls FUNCTION if it is non-nil, otherwise
 
 (defun harpoon--maybe-plist-get (plist key &optional default)
   "Get value of KEY from PLIST (if it is one)."
-  (if (and (plistp plist)
+  (if (and (harpoon--plistp plist)
            (plist-member plist key))
       (plist-get plist key)
     default))
@@ -256,10 +256,12 @@ This calls FUNCTION if it is non-nil, otherwise
 
 If optional EXPECTED-KEYS is provided, the plist must also
 contain at least one expected key."
-  (if expected-keys
-      (and (plistp plist)
-           (seq-some (lambda (it) (memq it expected-keys)) plist))
-    (plistp plist)))
+  (and-let* ((len (proper-list-p plist))
+             ((zerop (% len 2))))
+
+    (if expected-keys
+        (seq-some (lambda (it) (memq it expected-keys)) plist)
+      t)))
 
 (defun harpoon--value-unless-disabled (value &optional default)
   "Return VALUE unless it is the symbol `disabled'.

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Keyword `:flat` to skip setting up completion and syntax checking.
+
 ### Removed
 
 - Keywords `:corfu` and `:major` have been removed. Use `:completion`

@@ -364,6 +364,18 @@
         "Hook into `test-mode'."
         (message "hi")))))
 
+(ert-deftest harpoon-function--flat ()
+  (let ((harpoon-checker-function 'flymake-mode)
+        (harpoon-completion-provider 'corfu))
+
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :flat t
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (message "hi")))))
+
 (ert-deftest harpoon-completion--setup ()
   (let ((harpoon-completion-provider 'corfu))
     (bydi-match-expansion

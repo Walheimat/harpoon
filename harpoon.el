@@ -333,7 +333,8 @@ The message is formatted using optional ARGS."
     :messages
     :prog-like
     :tabs
-    :checker))
+    :checker
+    :flat))
 
 (defun harpoon--safe-body (body)
   "Collect everything from BODY that's a key."
@@ -438,6 +439,7 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      prog-like
      tabs
      checker
+     flat
      &allow-other-keys)
   "Create hook function for NAME.
 
@@ -467,6 +469,8 @@ means: do nothing. The symbol t will call
 `harpoon-tabs--disable'.
 
 CHECKER is the function to call to enable a syntax checker.
+
+If FLAT is t, setup for syntax checker and completion is skipped.
 
 The rest of the BODY will be spliced into the hook function."
   (declare (indent defun))
@@ -503,9 +507,12 @@ The rest of the BODY will be spliced into the hook function."
           ,@(harpoon--safe-body body)
 
           ;; Checker.
-          ,(when-let ((checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
+          ,(and-let* (((not flat))
+                      (checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
              (harpoon--log "Setting up checker `%s' for `%s'" checker name)
              `(,checker))
+
+          ;; LSP.
           ,@(and-let* (lsp
                        (fun (harpoon--maybe-plist-get lsp :function harpoon-lsp-function)))
 
@@ -515,21 +522,22 @@ The rest of the BODY will be spliced into the hook function."
                 (,fun)))
 
           ;; Completion.
-          ,@(cl-destructuring-bind
-                (provider auto delay prefix)
-                (harpoon-completion--parse (or corfu completion))
-              (harpoon--log
-               "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
-               provider name auto delay prefix)
-              (pcase provider
-                ('corfu
-                 `((setq-local corfu-auto-delay ,delay
-                               corfu-auto-prefix ,prefix
-                               corfu-auto ,auto)
-                   (local-set-key (kbd "C-M-i") #'completion-at-point)))
-                (_
-                 (harpoon--warn "Completion provider '%s' is not handled" provider)
-                 nil)))
+          ,@(unless flat
+              (cl-destructuring-bind
+                  (provider auto delay prefix)
+                  (harpoon-completion--parse (or corfu completion))
+                (harpoon--log
+                 "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
+                 provider name auto delay prefix)
+                (pcase provider
+                  ('corfu
+                   `((setq-local corfu-auto-delay ,delay
+                                 corfu-auto-prefix ,prefix
+                                 corfu-auto ,auto)
+                     (local-set-key (kbd "C-M-i") #'completion-at-point)))
+                  (_
+                   (harpoon--warn "Completion provider '%s' is not handled" provider)
+                   nil))))
 
           ;; Prog-like.
           ,(when prog-like
@@ -555,7 +563,7 @@ The rest of the BODY will be spliced into the hook function."
                  (kbd harpoon-bind-key)
                  ',key)))))))
 
-(cl-defmacro harpoon-hook (name)
+(defmacro harpoon-hook (name)
   "Create the hook call for NAME."
   `(add-hook
     ',(harpoon--function-name name)

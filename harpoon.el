@@ -214,6 +214,8 @@ the `harpoon-lsp-dir-ignore-list' is used."
   "Check if MODE is considered slow."
   (memq mode harpoon-lsp-slow-modes))
 
+(defalias 'harpoon-slow-lsp-p 'harpoon-lsp--slow-server-p)
+
 ;;; -- Helpers
 
 (defun harpoon--maybe-plist-get (plist key &optional default)

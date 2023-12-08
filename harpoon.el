@@ -15,7 +15,6 @@
 
 (require 'cl-lib)
 (require 'subr-x)
-(require 'treesit nil t)
 
 ;;; -- Customization
 

@@ -388,8 +388,10 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
   "Check if treesit is available for NAME."
   (and (harpoon--modern-emacs-p 29)
        (require 'treesit nil t)
-       (treesit-available-p)
-       (treesit-ready-p (harpoon-treesit--language name) t)))
+       (and (fboundp 'treesit-available-p)
+            (treesit-available-p))
+       (and (fboundp 'treesit-ready-p)
+            (treesit-ready-p (harpoon-treesit--language name) t))))
 
 (defun harpoon-treesit--language (name)
   "Get language for NAME."

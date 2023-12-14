@@ -7,14 +7,14 @@
 ;;; Code:
 
 (require 'bydi)
-(require 'bydi-report)
-(require 'bydi-ci)
+(require 'dinghy-rope)
 
 ;; Setup
 
-(bydi-ci-setup-paths)
-(bydi-report-setup-undercover (list "harpoon.el"))
-(bydi-report-setup-ert-runner)
+(dinghy-rope-setup-paths)
+(dinghy-rope-setup-undercover (list "harpoon.el"))
+(dinghy-rope-setup-ert-runner)
+(dinghy-rope-setup-ert :increase-print-depth t)
 
 ;;; test-helper.el ends here
 

@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Keywords `:corfu` and `:major` have been removed. Use `:completion`
   and `:bind` instead.
+- The defaults for `harpoon-lsp-{function,dir-ignore-list}` are now
+  set to the `lsp-mode` defaults. The default for
+  `harpoon-checker-function` is `flycheck-mode`.
 
 ### Fixed
 

@@ -43,14 +43,14 @@ smaller."
   :type '(repeat symbol)
   :group 'harpoon)
 
-(defcustom harpoon-lsp-function nil
+(defcustom harpoon-lsp-function 'lsp-deferred
   "Function to call to enable LSP mode."
-  :type 'symbol
+  :type 'function
   :group 'harpoon)
 
-(defcustom harpoon-lsp-dir-ignore-list nil
+(defcustom harpoon-lsp-dir-ignore-list 'lsp-file-watch-ignored-directories
   "Variable to add ignored directories to."
-  :type 'symbol
+  :type 'variable
   :group 'harpoon)
 
 (defcustom harpoon-completion-key "C-M-i"
@@ -78,13 +78,13 @@ smaller."
   :type 'integer
   :group 'harpoon)
 
-(defcustom harpoon-checker-function nil
+(defcustom harpoon-checker-function 'flycheck-mode
   "The checker to use.
 
 For example `flymake-mode' or `flycheck-mode'. If this variable
 is set, the checker function will be called for all hook
 functions unless `:checker' is passed symbol `disabled'."
-  :type 'symbol
+  :type 'function
   :group 'harpoon)
 
 (defcustom harpoon-bind-key "C-c h"

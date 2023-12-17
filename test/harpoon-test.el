@@ -9,7 +9,10 @@
 (require 'harpoon nil t)
 
 (setq harpoon-suppress-warnings t
-      harpoon-completion-provider nil)
+      harpoon-completion-provider nil
+      harpoon-checker-function nil
+      harpoon-lsp-function nil
+      harpoon-lsp-dir-ignore-list nil)
 
 (ert-deftest harpoon-prog-like ()
   (bydi ((:mock run-hooks :with bydi-rf))

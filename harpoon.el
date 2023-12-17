@@ -63,6 +63,21 @@ smaller."
   :type 'symbol
   :group 'harpoon)
 
+(defcustom harpoon-completion-auto t
+  "The default setting for auto completion."
+  :type 'boolean
+  :group 'harpoon)
+
+(defcustom harpoon-completion-delay 0.2
+  "The default delay for auto-completion."
+  :type 'float
+  :group 'harpoon)
+
+(defcustom harpoon-completion-prefix 3
+  "The default prefix length for completion."
+  :type 'integer
+  :group 'harpoon)
+
 (defcustom harpoon-checker-function nil
   "The checker to use.
 
@@ -128,13 +143,13 @@ This is either a plist or a cons of auto delay and auto prefix.
 Return list of four."
   (if (and (harpoon--plistp values '(:provider :auto :delay :prefix)))
       (list (harpoon--maybe-plist-get values :provider harpoon-completion-provider)
-            (harpoon--maybe-plist-get values :auto t)
-            (harpoon--maybe-plist-get values :delay 0.2)
-            (harpoon--maybe-plist-get values :prefix 3))
+            (harpoon--maybe-plist-get values :auto harpoon-completion-auto)
+            (harpoon--maybe-plist-get values :delay harpoon-completion-delay)
+            (harpoon--maybe-plist-get values :prefix harpoon-completion-prefix))
     (list harpoon-completion-provider
-          t
-          (or (car values) 0.2)
-          (or (cadr values) 3))))
+          harpoon-completion-auto
+          (or (car values) harpoon-completion-delay)
+          (or (cadr values) harpoon-completion-prefix))))
 
 ;;; -- Ligatures
 

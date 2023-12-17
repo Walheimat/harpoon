@@ -390,7 +390,7 @@
         (setq-local corfu-auto-delay 0.2
                     corfu-auto-prefix 4
                     corfu-auto t)
-        (local-set-key (kbd "C-M-i") #'completion-at-point)))))
+        (local-set-key (kbd harpoon-completion-key) #'completion-at-point)))))
 
 (ert-deftest harpoon--functions ()
   (let ((harpoon-completion-provider nil))

@@ -535,7 +535,7 @@ The rest of the BODY will be spliced into the hook function."
                    `((setq-local corfu-auto-delay ,delay
                                  corfu-auto-prefix ,prefix
                                  corfu-auto ,auto)
-                     (local-set-key (kbd "C-M-i") #'completion-at-point)))
+                     (local-set-key (kbd harpoon-completion-key) #'completion-at-point)))
                   (_
                    (harpoon--warn "Completion provider '%s' is not handled" provider)
                    nil))))

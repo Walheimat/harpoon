@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keywords `:corfu` and `:major` have been removed. Use `:completion`
   and `:bind` instead.
 
+### Fixed
+
+- Uses `harpoon-completion-key` when setting up completion at point.
+
 ## [v0.3.2]
 
 ### Added

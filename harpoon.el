@@ -102,6 +102,13 @@ functions unless `:checker' is passed symbol `disabled'."
   :type 'function
   :group 'harpoon)
 
+(defcustom harpoon-ligature-provider 'ligature
+  "The library used to provide ligature support.
+
+Currently, only `ligature' is supported."
+  :type 'symbol
+  :group 'harpoon)
+
 (defcustom harpoon-log nil
   "Whether to log during macro expansion.
 
@@ -153,6 +160,8 @@ Return list of four."
 
 ;;; -- Ligatures
 
+(declare-function ligature-set-ligatures "ext:ligature.el")
+
 (defconst harpoon-ligatures--common-ligatures
   '(
     "==" "!=" ">=" "<="        ; Comparison.
@@ -171,15 +180,17 @@ Return list of four."
 
 All ligatures in `harpoon-ligatures--common-ligatures' will be
 appended to LIGATURES."
-  (declare-function ligature-set-ligatures "ext:ligature.el")
+  (pcase harpoon-ligature-provider
+    ('ligature
+     (and-let* (((require 'ligature nil t))
+                (combined (append ligatures harpoon-ligatures--common-ligatures)))
 
-  (and-let* (((require 'ligature nil t))
-             (combined (append ligatures harpoon-ligatures--common-ligatures)))
-
-    (harpoon--log "Setting up ligatures [%s] for `%s'"
-                  (string-join combined " ")
-                  mode)
-    (ligature-set-ligatures mode combined)))
+       (harpoon--log "Setting up ligatures [%s] for `%s'"
+                     (string-join combined " ")
+                     mode)
+       (ligature-set-ligatures mode combined)))
+    (_
+     (user-error "Unsupported ligature provider `%s'" harpoon-ligature-provider))))
 
 ;;; -- Messages
 

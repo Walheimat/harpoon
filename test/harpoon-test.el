@@ -39,7 +39,11 @@
 
       (harpoon-ligatures--set-ligatures 'test-mode '("!"))
 
-      (bydi-was-called-with ligature-set-ligatures (list 'test-mode '("!" "?"))))))
+      (bydi-was-called-with ligature-set-ligatures (list 'test-mode '("!" "?")))))
+
+  (let ((harpoon-ligature-provider 'unknown))
+
+    (should-error (harpoon-ligatures--set-ligatures 'test-mode '("??")))))
 
 (ert-deftest harpoon-completion--parse--defaults ()
   (let ((harpoon-completion-provider 'corfu))

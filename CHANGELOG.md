@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keyword `:flat` to skip setting up completion and syntax checking.
 - The defaults for `:completion` are now customizable through
   `harpoon-completion-{auto,delay,prefix}`.
+- Variable `harpoon-ligature-provider` which defaults to `ligature`.
+  Leaves space open for alternatives and their implementation.
 
 ### Removed
 

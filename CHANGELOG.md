@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `harpoon-completion-{auto,delay,prefix}`.
 - Variable `harpoon-ligature-provider` which defaults to `ligature`.
   Leaves space open for alternatives and their implementation.
+- Variable `harpoon-lsp-provider` which defaults to `lsp-mode`.
 
 ### Removed
 
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The defaults for `harpoon-lsp-{function,dir-ignore-list}` are now
   set to the `lsp-mode` defaults. The default for
   `harpoon-checker-function` is `flycheck-mode`.
+- Variables `harpoon-lsp-{function,dir-ignore-list}`.
 
 ### Fixed
 

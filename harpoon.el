@@ -30,6 +30,11 @@ obeyed."
   :type 'boolean
   :group 'harpoon)
 
+(defcustom harpoon-lsp-provider 'lsp-mode
+  "The provider for LSP functionality."
+  :type 'symbol
+  :group 'harpoon)
+
 (defcustom harpoon-lsp-completion-styles '(partial-completion basic)
   "The `completion-styles' used for LSP."
   :type '(repeat sybmol)
@@ -41,16 +46,6 @@ obeyed."
 For these modes completion settings will not be adjusted to be
 smaller."
   :type '(repeat symbol)
-  :group 'harpoon)
-
-(defcustom harpoon-lsp-function 'lsp-deferred
-  "Function to call to enable LSP mode."
-  :type 'function
-  :group 'harpoon)
-
-(defcustom harpoon-lsp-dir-ignore-list 'lsp-file-watch-ignored-directories
-  "Variable to add ignored directories to."
-  :type 'variable
   :group 'harpoon)
 
 (defcustom harpoon-completion-key "C-M-i"
@@ -228,12 +223,16 @@ It can be either a list of strings or a single string.
 
 The DIR is appended to IGNORE-LIST if it is non-nil; otherwise
 the `harpoon-lsp-dir-ignore-list' is used."
-  (let ((dirs (if (listp dir) dir (list dir))))
+  (let ((dirs (if (listp dir) dir (list dir)))
+        (ignore-list (or ignore-list
+                         (pcase harpoon-lsp-provider
+                           ('lsp-mode
+                            'lsp-file-watch-ignored-directories)))))
 
     (thread-last
       dirs
       (mapcar 'harpoon-lsp--escape-ignore-directory)
-      (harpoon--append (or ignore-list harpoon-lsp-dir-ignore-list)))))
+      (harpoon--append ignore-list))))
 
 (defun harpoon-lsp--slow-server-p (mode)
   "Check if MODE is considered slow."
@@ -541,7 +540,10 @@ The rest of the BODY will be spliced into the hook function."
 
           ;; LSP.
           ,@(and-let* (lsp
-                       (fun (harpoon--maybe-plist-get lsp :function harpoon-lsp-function)))
+                       (from-provider (pcase harpoon-lsp-provider
+                                        ('lsp-mode
+                                         'lsp-deferred)))
+                       (fun (harpoon--maybe-plist-get lsp :function from-provider)))
 
               (harpoon--log "Will set up LSP using function `%s' for `%s'" fun name)
               `((unless (harpoon-lsp--slow-server-p major-mode)

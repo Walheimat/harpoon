@@ -11,8 +11,7 @@
 (setq harpoon-suppress-warnings t
       harpoon-completion-provider nil
       harpoon-checker-function nil
-      harpoon-lsp-function nil
-      harpoon-lsp-dir-ignore-list nil)
+      harpoon-lsp-provider 'lsp-mode)
 
 (ert-deftest harpoon-prog-like ()
   (bydi ((:mock run-hooks :with bydi-rf))
@@ -72,13 +71,13 @@
 
     (harpoon-lsp--ignore-directory "test")
 
-    (bydi-was-called-with harpoon--append (list harpoon-lsp-dir-ignore-list '("test")))
+    (bydi-was-called-with harpoon--append (list 'lsp-file-watch-ignored-directories '("test")))
 
     (bydi-clear-mocks)
 
     (harpoon-lsp--ignore-directory '("test" "best"))
 
-    (bydi-was-called-with harpoon--append (list harpoon-lsp-dir-ignore-list '("test" "best")))))
+    (bydi-was-called-with harpoon--append (list 'lsp-file-watch-ignored-directories '("test" "best")))))
 
 (ert-deftest harpoon--plistp ()
   (should (harpoon--plistp '(1 2)))

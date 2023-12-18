@@ -457,7 +457,6 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &key
      bind
      major
-     corfu
      completion
      functions
      lsp
@@ -473,7 +472,7 @@ BIND (or MAJOR) is either a symbol, t or nil. If it is a symbol,
 the `harpoon-bind-key' will be bound to it. If it is t, a symbol
 yielded from `harpoon-bind-function' will be bound instead.
 
-COMPLETION (or CORFU) is a list of (IDLE-DELAY PREFIX-LENGTH).
+COMPLETION is a list of (IDLE-DELAY PREFIX-LENGTH).
 
 FUNCTIONS is a list of functions (for example modes) that should
 be called if they are bound.
@@ -554,7 +553,7 @@ The rest of the BODY will be spliced into the hook function."
           ,@(unless flat
               (cl-destructuring-bind
                   (provider auto delay prefix)
-                  (harpoon-completion--parse (or corfu completion))
+                  (harpoon-completion--parse completion)
                 (harpoon--log
                  "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
                  provider name auto delay prefix)

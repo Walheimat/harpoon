@@ -541,7 +541,9 @@ The rest of the BODY will be spliced into the hook function."
           ,@(and-let* (lsp
                        (from-provider (pcase harpoon-lsp-provider
                                         ('lsp-mode
-                                         'lsp-deferred)))
+                                         'lsp-deferred)
+                                        (_
+                                         (harpoon--warn "Completion provider `%s' is not handled" harpoon-lsp-provider))))
                        (fun (harpoon--maybe-plist-get lsp :function from-provider)))
 
               (harpoon--log "Will set up LSP using function `%s' for `%s'" fun name)

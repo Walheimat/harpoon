@@ -254,17 +254,16 @@
       (harpoon-treesit test-mode))))
 
 (ert-deftest harpoon-function ()
-  (let ((harpoon-lsp-function 'lsp-deferred))
-    (bydi-match-expansion
-     (harpoon-function test-mode
-       :messages ("Just testing")
-       :lsp t)
-     `(defun test-mode-harpoon ()
-        "Hook into `test-mode'."
-        (harpoon-message--in-a-bottle '("Just testing"))
-        (unless (harpoon-lsp--slow-server-p major-mode)
-          (setq-local completion-styles harpoon-lsp-completion-styles))
-        (lsp-deferred)))))
+  (bydi-match-expansion
+   (harpoon-function test-mode
+     :messages ("Just testing")
+     :lsp t)
+   `(defun test-mode-harpoon ()
+      "Hook into `test-mode'."
+      (harpoon-message--in-a-bottle '("Just testing"))
+      (unless (harpoon-lsp--slow-server-p major-mode)
+        (setq-local completion-styles harpoon-lsp-completion-styles))
+      (lsp-deferred))))
 
 (ert-deftest harpoon-function--custom ()
   (bydi-match-expansion
@@ -381,6 +380,20 @@
      `(defun test-mode-harpoon ()
         "Hook into `test-mode'."
         (message "hi")))))
+
+(ert-deftest harpoon-function--missing-provider ()
+  (let ((harpoon-lsp-provider 'none))
+
+    (bydi ((:spy harpoon--warn))
+      (bydi-match-expansion
+       (harpoon-function test-mode
+         :messages ("Just testing")
+         :lsp t)
+       `(defun test-mode-harpoon ()
+          "Hook into `test-mode'."
+          (harpoon-message--in-a-bottle '("Just testing"))))
+
+      (bydi-was-called harpoon--warn))))
 
 (ert-deftest harpoon-completion--setup ()
   (let ((harpoon-completion-provider 'corfu))

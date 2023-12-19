@@ -453,7 +453,6 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      body
      &key
      bind
-     major
      completion
      functions
      lsp
@@ -465,8 +464,8 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
      &allow-other-keys)
   "Create hook function for NAME.
 
-BIND (or MAJOR) is either a symbol, t or nil. If it is a symbol,
-the `harpoon-bind-key' will be bound to it. If it is t, a symbol
+BIND is either a symbol, t or nil. If it is a symbol, the
+`harpoon-bind-key' will be bound to it. If it is t, a symbol
 yielded from `harpoon-bind-function' will be bound instead.
 
 COMPLETION is a list of (IDLE-DELAY PREFIX-LENGTH).
@@ -578,7 +577,7 @@ The rest of the BODY will be spliced into the hook function."
                                functions)))
 
           ;; Binding.
-          ,(when-let ((setting (or major bind)))
+          ,(when-let ((setting bind))
              (let ((key (cond
                          ((booleanp setting)
                           (funcall harpoon-bind-function name))

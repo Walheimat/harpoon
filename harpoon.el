@@ -58,11 +58,6 @@ smaller."
   :type 'symbol
   :group 'harpoon)
 
-(defcustom harpoon-completion-auto t
-  "The default setting for auto completion."
-  :type 'boolean
-  :group 'harpoon)
-
 (defcustom harpoon-completion-delay 0.2
   "The default delay for auto-completion."
   :type 'float
@@ -143,13 +138,11 @@ Sets tab variable `indent-tabs-mode' to t."
 
 This is either a plist or a cons of auto delay and auto prefix.
 Return list of four."
-  (if (and (harpoon--plistp values '(:provider :auto :delay :prefix)))
+  (if (and (harpoon--plistp values '(:provider :delay :prefix)))
       (list (harpoon--maybe-plist-get values :provider harpoon-completion-provider)
-            (harpoon--maybe-plist-get values :auto harpoon-completion-auto)
             (harpoon--maybe-plist-get values :delay harpoon-completion-delay)
             (harpoon--maybe-plist-get values :prefix harpoon-completion-prefix))
     (list harpoon-completion-provider
-          harpoon-completion-auto
           (or (car values) harpoon-completion-delay)
           (or (cadr values) harpoon-completion-prefix))))
 
@@ -554,16 +547,15 @@ The rest of the BODY will be spliced into the hook function."
           ;; Completion.
           ,@(unless flat
               (cl-destructuring-bind
-                  (provider auto delay prefix)
+                  (provider delay prefix)
                   (harpoon-completion--parse completion)
                 (harpoon--log
-                 "Setting up `%s' for `%s' using auto %s, delay %.1f and prefix %d"
-                 provider name auto delay prefix)
+                 "Setting up `%s' for `%s' using delay %.1f and prefix %d"
+                 provider name delay prefix)
                 (pcase provider
                   ('corfu
                    `((setq-local corfu-auto-delay ,delay
-                                 corfu-auto-prefix ,prefix
-                                 corfu-auto ,auto)
+                                 corfu-auto-prefix ,prefix)
                      (local-set-key (kbd harpoon-completion-key) #'completion-at-point)))
                   (_
                    (harpoon--warn "Completion provider '%s' is not handled" provider)

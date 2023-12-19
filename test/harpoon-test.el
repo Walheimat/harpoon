@@ -49,12 +49,12 @@
 
 (ert-deftest harpoon-completion--parse--defaults ()
   (let ((harpoon-completion-provider 'corfu))
-    (should (equal '(corfu t 2.1 4)
+    (should (equal '(corfu 2.1 4)
                    (harpoon-completion--parse (list 2.1 4))))))
 
 (ert-deftest harpoon-completion--parse--sets-corfu-using-plist ()
-  (should (equal '(corfu nil 0.1 5)
-                 (harpoon-completion--parse '(:provider corfu :auto nil :delay 0.1 :prefix 5)))))
+  (should (equal '(corfu 0.1 5)
+                 (harpoon-completion--parse '(:provider corfu :delay 0.1 :prefix 5)))))
 
 (ert-deftest harpoon-lsp--slow-server-p ()
   (let ((harpoon-lsp-slow-modes '(test-mode)))
@@ -407,8 +407,7 @@
         (harpoon-message--in-a-bottle '("Just testing"))
         (message "hi")
         (setq-local corfu-auto-delay 0.2
-                    corfu-auto-prefix 4
-                    corfu-auto t)
+                    corfu-auto-prefix 4)
         (local-set-key (kbd harpoon-completion-key) #'completion-at-point)))))
 
 (ert-deftest harpoon--functions ()

@@ -123,7 +123,7 @@
 
     (with-current-buffer (get-buffer harpoon-log--buffer)
       (should (string= (buffer-string)
-                       "This is the first message\nThis will be the second message\n")))))
+                       "Macro expansions\nThis is the first message\nThis will be the second message\n")))))
 
 (ert-deftest harpoon-pop-to-logs ()
   (bydi (pop-to-buffer)

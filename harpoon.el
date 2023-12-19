@@ -329,6 +329,10 @@ The message is formatted using optional ARGS."
           (view-mode)))
 
       (with-current-buffer buffer
+
+        (when (string-empty-p (buffer-string))
+          (insert "Macro expansions\n"))
+
         (goto-char (point-max))
         (insert (apply #'format fmt args))
         (insert "\n")))))

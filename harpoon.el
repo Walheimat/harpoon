@@ -10,6 +10,9 @@
 
 ;; `harpoon' is a macro to set up major-modes (mainly those of
 ;; programming languages) in a standardized way.
+;;
+;; Have a look at `harpoon-function' the main macro calls for
+;; explanations of what can be configured.
 
 ;;; Code:
 
@@ -468,20 +471,24 @@ BIND is either a symbol, t or nil. If it is a symbol, the
 `harpoon-bind-key' will be bound to it. If it is t, a symbol
 yielded from `harpoon-bind-function' will be bound instead.
 
-COMPLETION is a list of (IDLE-DELAY PREFIX-LENGTH).
+COMPLETION is a list of (IDLE-DELAY PREFIX-LENGTH). Otherwise
+defaults `harpoon-completion-delay' and
+`harpoon-completion-prefix' are used. These values are set based
+on `harpoon-completion-provider'. If completion is enabled, the
+`harpoon-completion-key' is set locally. See also
+`harpoon-lsp-completion-styles' if you enable LSP.
 
 FUNCTIONS is a list of functions (for example modes) that should
 be called if they are bound.
 
-LSP is either nil, t or a plist. For the purpose of this macro,
-any non-nil value will eventually call the
-`harpoon-lsp-function'.
+LSP is either nil, t or a plist. If it's not a plist, the
+defaults depend on the `harpoon-lsp-provider'.
 
 MESSAGES is a list of strings to randomly choose from and
-display.
+display when the function is run.
 
 PROG-LIKE is either nil or t. If it's t, the created function
-will run `prog-like-hook'.
+will run `prog-like-hook' that other function can hook into.
 
 TABS is either nil, t, `always' or `never'. Nil (or missing)
 means: do nothing. The symbol t will call
@@ -489,11 +496,15 @@ means: do nothing. The symbol t will call
 `harpoon-tabs--enable' and the symbol `never' will call
 `harpoon-tabs--disable'.
 
-CHECKER is the function to call to enable a syntax checker.
+CHECKER is the function to call to enable a syntax checker,
+defaulting to `harpoon-checker-function'.
 
 If FLAT is t, setup for syntax checker and completion is skipped.
+This makes sense if you create a `harpoon' for a major mode that
+others derive from and also have a `harpoon'.
 
-The rest of the BODY will be spliced into the hook function."
+The rest of the BODY will be spliced into the hook function after
+MESSAGES and TABS."
   (declare (indent defun))
 
   `(defun ,(harpoon--function-name name t) ()

@@ -374,10 +374,11 @@ The message is formatted using optional ARGS."
       (harpoon-treesit--name name)
     name))
 
-(defun harpoon--function-name (mode &optional harpoon)
+(defun harpoon--function-name (mode &optional harpoon new)
   "Get the name of the target hook for MODE.
 
-The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
+The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'.
+If NEW is t, log this name as created."
   (let* ((suffix (if harpoon "harpoon" "hook"))
          (name (thread-first
                  mode
@@ -386,7 +387,8 @@ The suffix is `-hook' unless HARPOON is t, then it is `-harpoon'."
                  (concat "-" suffix)
                  (intern))))
 
-    (harpoon--log "Creating function named `%s' for `%s'" name mode)
+    (when new
+      (harpoon--log "Creating function named `%s' for `%s'" name mode))
 
     name))
 
@@ -507,7 +509,7 @@ The rest of the BODY will be spliced into the hook function after
 MESSAGES and TABS."
   (declare (indent defun))
 
-  `(defun ,(harpoon--function-name name t) ()
+  `(defun ,(harpoon--function-name name t t) ()
      ,(format "Hook into `%s'." name)
      ,@(delete
         nil

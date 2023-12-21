@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Uses `harpoon-completion-key` when setting up completion at point.
+- Only actually created functions are logged as created.
 
 ## [v0.3.2]
 

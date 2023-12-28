@@ -26,10 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Variables `harpoon-lsp-{function,dir-ignore-list}`.
 - Variable `harpoon-completion-auto` in order to respect the global
   value (of `corfu-auto` for example).
+- Variable `harpoon-completion-key` that would locally bind it to
+  `completion-at-point`.
 
 ### Fixed
 
-- Uses `harpoon-completion-key` when setting up completion at point.
 - Only actually created functions are logged as created.
 
 ## [v0.3.2]

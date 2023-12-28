@@ -407,8 +407,7 @@
         (harpoon-message--in-a-bottle '("Just testing"))
         (message "hi")
         (setq-local corfu-auto-delay 0.2
-                    corfu-auto-prefix 4)
-        (local-set-key (kbd harpoon-completion-key) #'completion-at-point)))))
+                    corfu-auto-prefix 4)))))
 
 (ert-deftest harpoon--functions ()
   (let ((harpoon-completion-provider nil))

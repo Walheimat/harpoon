@@ -51,11 +51,6 @@ smaller."
   :type '(repeat symbol)
   :group 'harpoon)
 
-(defcustom harpoon-completion-key "C-M-i"
-  "The key combination to use for `completion-at-point'."
-  :type 'key-sequence
-  :group 'harpoon)
-
 (defcustom harpoon-completion-provider 'corfu
   "The completion provider used."
   :type 'symbol
@@ -476,8 +471,7 @@ yielded from `harpoon-bind-function' will be bound instead.
 COMPLETION is a list of (IDLE-DELAY PREFIX-LENGTH). Otherwise
 defaults `harpoon-completion-delay' and
 `harpoon-completion-prefix' are used. These values are set based
-on `harpoon-completion-provider'. If completion is enabled, the
-`harpoon-completion-key' is set locally. See also
+on `harpoon-completion-provider'. See also
 `harpoon-lsp-completion-styles' if you enable LSP.
 
 FUNCTIONS is a list of functions (for example modes) that should
@@ -571,8 +565,7 @@ MESSAGES and TABS."
                 (pcase provider
                   ('corfu
                    `((setq-local corfu-auto-delay ,delay
-                                 corfu-auto-prefix ,prefix)
-                     (local-set-key (kbd harpoon-completion-key) #'completion-at-point)))
+                                 corfu-auto-prefix ,prefix)))
                   (_
                    (harpoon--warn "Completion provider '%s' is not handled" provider)
                    nil))))

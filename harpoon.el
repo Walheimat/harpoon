@@ -615,14 +615,12 @@ LIGATURES is a list of strings that should be set using
   "Set up LSP for NAME.
 
 LSP is either nil, t or a plist. If it is a plist, key
-`:ignore-dirs' can be used to add additional paths to variable
-`lsp-file-watch-ignored-directories'."
+`:ignore-dirs' can be used to add additional paths to ignore."
   (when-let ((dirs (harpoon--maybe-plist-get lsp :ignore-dirs)))
     (harpoon--log "Will ignore directories %s for `%s'" dirs name)
-    `(with-eval-after-load 'lsp-mode
-       (when harpoon-lsp-dir-ignore-list
-         (harpoon-lsp--ignore-directory ',(plist-get lsp :ignore-dirs)
-                                       ',(plist-get lsp :dir-ignore-list))))))
+    `(with-eval-after-load harpoon-lsp-provider
+       (harpoon-lsp--ignore-directory ',(plist-get lsp :ignore-dirs)
+                                     ',(plist-get lsp :dir-ignore-list)))))
 
 (cl-defmacro harpoon-treesit (name)
   "Remap mode NAME to tree-sitter variant if possible."

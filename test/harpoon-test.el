@@ -433,16 +433,14 @@
 (ert-deftest harpoon-lsp ()
   (bydi-match-expansion
    (harpoon-lsp test-mode :lsp (:ignore-dirs (".ignoramus")))
-   `(with-eval-after-load 'lsp-mode
-      (when harpoon-lsp-dir-ignore-list
-        (harpoon-lsp--ignore-directory '(".ignoramus") 'nil)))))
+   `(with-eval-after-load harpoon-lsp-provider
+      (harpoon-lsp--ignore-directory '(".ignoramus") 'nil))))
 
 (ert-deftest harpoon-lsp--custom-dir-var ()
   (bydi-match-expansion
    (harpoon-lsp test-mode :lsp (:ignore-dirs (".ignoramus") :dir-ignore-list lsp-file-watch-ignored-directories))
-   `(with-eval-after-load 'lsp-mode
-      (when harpoon-lsp-dir-ignore-list
-        (harpoon-lsp--ignore-directory '(".ignoramus") 'lsp-file-watch-ignored-directories)))))
+   `(with-eval-after-load harpoon-lsp-provider
+      (harpoon-lsp--ignore-directory '(".ignoramus") 'lsp-file-watch-ignored-directories))))
 
 (ert-deftest harpoon-treesit ()
   (bydi ((:always harpoon-treesit--ready-p))

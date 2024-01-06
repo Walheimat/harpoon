@@ -3,7 +3,7 @@
 ;; Author: Krister Schuchardt <krister.schuchardt@gmail.com>
 ;; Homepage: https://github.com/Walheimat/partial-recall
 ;; Version: 0.3.3
-;; Package-Requires: ((emacs "28.1"))
+
 ;; Keywords: frames files convenience
 
 ;;; Commentary:
@@ -19,7 +19,7 @@
 (require 'cl-lib)
 (require 'subr-x)
 
-;;; -- Customization
+;;;; Customization
 
 (defgroup harpoon nil
   "Harpoon settings."
@@ -109,7 +109,7 @@ The logging is done to buffer `harpoon-log--buffer'."
   :type 'boolean
   :group 'harpoon)
 
-;;; -- Indentation
+;;;; Indentation
 
 (defun harpoon-tabs--disable ()
   "Disable tabs.
@@ -129,7 +129,7 @@ Sets tab variable `indent-tabs-mode' to t."
       (harpoon-tabs--enable)
     (harpoon-tabs--disable)))
 
-;;; -- Completion
+;;;; Completion
 
 (defun harpoon-completion--parse (values)
   "Parse VALUES for completion.
@@ -144,7 +144,7 @@ Return list of four."
           (or (car values) harpoon-completion-delay)
           (or (cadr values) harpoon-completion-prefix))))
 
-;;; -- Ligatures
+;;;; Ligatures
 
 (declare-function ligature-set-ligatures "ext:ligature.el")
 
@@ -178,7 +178,7 @@ appended to LIGATURES."
     (_
      (user-error "Unsupported ligature provider `%s'" harpoon-ligature-provider))))
 
-;;; -- Messages
+;;;; Messages
 
 (defconst harpoon-message--ascii-blue-whale (propertize "}    , ﬞ   ⎠" 'face 'mode-line-emphasis)
   "A small, highlighted ASCII blue whale.")
@@ -199,7 +199,7 @@ whale by default."
               " "
               (propertize message 'face 'italic)))))
 
-;;; -- LSP
+;;;; LSP
 
 (defun harpoon-lsp--escape-ignore-directory (dir)
   "Escape directory DIR."
@@ -231,7 +231,7 @@ the `harpoon-lsp-dir-ignore-list' is used."
 
 (defalias 'harpoon-slow-lsp-p 'harpoon-lsp--slow-server-p)
 
-;;; -- Helpers
+;;;; Helpers
 
 (defun harpoon--maybe-plist-get (plist key &optional default)
   "Get value of KEY from PLIST (if it is one)."
@@ -293,7 +293,7 @@ throws are 3 or THROWS."
         (seq-min results)
       (seq-max results))))
 
-;;; -- Prog-like
+;;;; Prog-like
 
 (defvar harpoon-prog-like-hook nil
   "Commands that should be run for prog-like modes.")
@@ -302,7 +302,7 @@ throws are 3 or THROWS."
   "Run `prog-like-hook' functions."
   (run-hooks 'harpoon-prog-like-hook))
 
-;;; -- IO
+;;;; IO
 
 (defun harpoon--warn (message &rest args)
   "Warn about MESSAGE.
@@ -341,7 +341,7 @@ The message is formatted using optional ARGS."
 
 (defalias 'harpoon--log 'harpoon-log--insert-indented)
 
-;;; -- Macro helpers
+;;;; Macro helpers
 
 (defvar harpoon--keywords
   '(:bind
@@ -387,7 +387,7 @@ If NEW is t, log this name as created."
 
     name))
 
-;;; -- Treesit
+;;;; Treesit
 
 (defvar harpoon-treesit--modes '((js-mode . javascript)
                                  (c++-mode . cpp)
@@ -439,13 +439,13 @@ If NEW is t, log this name as created."
 
     (intern (concat segment "-ts-mode"))))
 
-;;; -- Binding
+;;;; Binding
 
 (defun harpoon-bind--construct (name)
   "Construct a symbol for NAME."
   (intern (concat (symbol-name name) harpoon-bind-name-suffix)))
 
-;;; -- Macros
+;;;; Macros
 
 (cl-defmacro harpoon-function
     (name
@@ -642,7 +642,7 @@ LSP is either nil, t or a plist. If it is a plist, key
 
            (add-to-list 'all-the-icons-mode-icon-alist (cons name setting)))))))
 
-;;; -- API
+;;;; API
 
 (cl-defmacro harpoon (name &rest args)
   "Hook into mode NAME.

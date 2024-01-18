@@ -214,6 +214,11 @@
 
       (should (string-equal (harpoon-message--in-a-bottle bottle "}< ,.__)") "}< ,.__) Sting is playing bass, yeah")))))
 
+(ert-deftest harpoon-message ()
+  (bydi run-with-idle-timer
+    (harpoon-message nil nil)
+    (bydi-was-called run-with-idle-timer)))
+
 (ert-deftest harpoon-treesit--ready-p ()
   (defvar harpoon-treesit--alist)
   (bydi ((:always harpoon-modern-emacs-p)
@@ -260,7 +265,7 @@
      :lsp t)
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
+      (harpoon-message '("Just testing"))
       (unless (harpoon-lsp--slow-server-p major-mode)
         (setq-local completion-styles harpoon-lsp-completion-styles))
       (lsp-deferred))))
@@ -272,7 +277,7 @@
      :lsp (:function eglot-ensure))
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
+      (harpoon-message '("Just testing"))
       (unless (harpoon-lsp--slow-server-p major-mode)
           (setq-local completion-styles harpoon-lsp-completion-styles))
         (eglot-ensure))))
@@ -284,7 +289,7 @@
      :tabs anything)
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
+      (harpoon-message '("Just testing"))
       (hack-local-variables)
       (harpoon-tabs--maybe-enable))))
 
@@ -295,7 +300,7 @@
      :tabs always)
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
+      (harpoon-message '("Just testing"))
       (harpoon-tabs--enable))))
 
 (ert-deftest harpoon-function--no-tabs ()
@@ -306,7 +311,7 @@
      :tabs never)
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
+      (harpoon-message '("Just testing"))
       (harpoon-tabs--disable))))
 
 (ert-deftest harpoon-function--prog-like ()
@@ -317,7 +322,7 @@
      (message "hi"))
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
-      (harpoon-message--in-a-bottle '("Just testing"))
+      (harpoon-message '("Just testing"))
       (message "hi")
       (run-hooks 'harpoon-prog-like-hook))))
 
@@ -391,7 +396,7 @@
          :lsp t)
        `(defun test-mode-harpoon ()
           "Hook into `test-mode'."
-          (harpoon-message--in-a-bottle '("Just testing"))))
+          (harpoon-message '("Just testing"))))
 
       (bydi-was-called harpoon--warn))))
 
@@ -404,7 +409,7 @@
        (message "hi"))
      `(defun test-mode-harpoon ()
         "Hook into `test-mode'."
-        (harpoon-message--in-a-bottle '("Just testing"))
+        (harpoon-message '("Just testing"))
         (message "hi")
         (setq-local corfu-auto-delay 0.2
                     corfu-auto-prefix 4)))))

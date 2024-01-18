@@ -184,7 +184,7 @@ appended to LIGATURES."
   "A small, highlighted ASCII blue whale.")
 
 (defun harpoon-message--in-a-bottle (bottle &optional whale)
-  "Randomly display a message from the given BOTTLE.
+  "Display a random message from the given BOTTLE after idling.
 
 That bottle is just an array of strings.
 
@@ -198,6 +198,10 @@ whale by default."
               whale
               " "
               (propertize message 'face 'italic)))))
+
+(defun harpoon-message (messages &optional prefix)
+  "Show one of MESSAGES prefixed by PREFIX."
+  (run-with-idle-timer 1 nil #'harpoon-message--in-a-bottle messages prefix))
 
 ;;;; LSP
 
@@ -512,7 +516,7 @@ MESSAGES and TABS."
              (harpoon--log "Will pick random message from [%s] for `%s'"
                            (string-join messages "; ")
                            name)
-             `(harpoon-message--in-a-bottle ',messages))
+             `(harpoon-message ',messages))
 
           ;; Indentation.
           ,@(cond

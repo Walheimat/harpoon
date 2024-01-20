@@ -471,11 +471,17 @@
     (should (equal 'test-ts-mode (harpoon--mode-name 'test-mode)))))
 
 (ert-deftest harpoon-hook ()
-  (bydi-match-expansion
-   (harpoon-hook test-mode)
-   `(add-hook
-     'test-mode-hook
-     'test-mode-harpoon)))
+  (let ((harpoon-hook--sisters '((test-mode-hook . (test-extra-mode-hook)))))
+
+    (bydi-match-expansion
+     (harpoon-hook test-mode)
+     `(progn
+        (add-hook
+         'test-mode-hook
+         'test-mode-harpoon)
+        (add-hook
+         'test-extra-mode-hook
+         'test-mode-harpoon)))))
 
 ;;; harpoon-test.el ends here
 

@@ -394,6 +394,7 @@ If NEW is t, log this name as created."
 ;;;; Treesit
 
 (defvar harpoon-treesit--modes '((js-mode . javascript)
+                                 (typescript-mode . typescript)
                                  (c++-mode . cpp)
                                  (c-mode . c)
                                  (python-mode . python)
@@ -598,11 +599,23 @@ MESSAGES and TABS."
                  (kbd harpoon-bind-key)
                  ',key)))))))
 
+(defvar harpoon-hook--sisters '((typescript-ts-mode-hook . (tsx-ts-mode-hook)))
+  "Alist of sister modes.
+
+These are modes that should work exactly like the original mode.")
+
 (defmacro harpoon-hook (name)
   "Create the hook call for NAME."
-  `(add-hook
-    ',(harpoon--function-name name)
-    ',(harpoon--function-name name t)))
+  (let* ((hook (harpoon--function-name name))
+         (harpoon (harpoon--function-name name t))
+         (sisters (append (list hook)
+                          (cdr-safe (assoc hook harpoon-hook--sisters)))))
+
+    `(progn
+       ,@(mapcar
+          (lambda (it)
+            `(add-hook ',it ',harpoon))
+          sisters))))
 
 (cl-defmacro harpoon-ligatures (name &key ligatures &allow-other-keys)
   "Set up ligatures for NAME.

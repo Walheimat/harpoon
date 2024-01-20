@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `typescript-mode` is now considered to bee tree-sat.
+- Variable `harpoon-hook--sisters` to register additional hooks to
+  set up.
+
 ### Changed
 
 - Messages are now shown after an idle delay of 1 second.

@@ -109,6 +109,18 @@ The logging is done to buffer `harpoon-log--buffer'."
   :type 'boolean
   :group 'harpoon)
 
+(defcustom harpoon-message-prefix "}    , ﬞ   ⎠"
+  "Prefix for mode messages."
+  :type 'string
+  :group 'harpoon)
+
+;;; Faces
+
+(defface harpoon-emphasis
+  '((t (:inherit (font-lock-type-face))))
+  "Face used for emphasis."
+  :group 'harpoon)
+
 ;;;; Indentation
 
 (defun harpoon-tabs--disable ()
@@ -180,10 +192,7 @@ appended to LIGATURES."
 
 ;;;; Messages
 
-(defconst harpoon-message--ascii-blue-whale (propertize "}    , ﬞ   ⎠" 'face 'font-lock-type-face)
-  "A small, highlighted ASCII blue whale.")
-
-(defun harpoon-message--in-a-bottle (bottle &optional whale)
+(defun harpoon-message--in-a-bottle (bottle)
   "Display a random message from the given BOTTLE after idling.
 
 That bottle is just an array of strings.
@@ -192,16 +201,16 @@ WHALE is the string used to prefix the message with or the blue
 whale by default."
   (let* ((message-log-max nil) ; Don't clutter.
          (message (nth (harpoon--biased-random (length bottle)) bottle))
-         (whale (or whale harpoon-message--ascii-blue-whale)))
+         (whale (propertize harpoon-message-prefix 'face 'harpoon-emphasis)))
 
     (message (concat
               whale
               " "
               (propertize message 'face 'italic)))))
 
-(defun harpoon-message (messages &optional prefix)
-  "Show one of MESSAGES prefixed by PREFIX."
-  (run-with-idle-timer 1 nil #'harpoon-message--in-a-bottle messages prefix))
+(defun harpoon-message (messages)
+  "Show one of MESSAGES."
+  (run-with-idle-timer 1 nil #'harpoon-message--in-a-bottle messages))
 
 ;;;; LSP
 

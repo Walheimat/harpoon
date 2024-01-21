@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Messages are now shown after an idle delay of 1 second.
+- The prefix used for messages can be customized using
+  `harpoon-message-prefix`. By default it's a whale.
 
 ### Fixed
 

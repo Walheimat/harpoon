@@ -212,11 +212,13 @@
 
     (bydi ((:mock message :with bydi-rf))
 
-      (should (string-equal (harpoon-message--in-a-bottle bottle "}< ,.__)") "}< ,.__) Sting is playing bass, yeah")))))
+      (let ((harpoon-message-prefix "}< ,.__)"))
+
+        (should (string-equal (harpoon-message--in-a-bottle bottle) "}< ,.__) Sting is playing bass, yeah"))))))
 
 (ert-deftest harpoon-message ()
   (bydi run-with-idle-timer
-    (harpoon-message nil nil)
+    (harpoon-message nil)
     (bydi-was-called run-with-idle-timer)))
 
 (ert-deftest harpoon-treesit--ready-p ()

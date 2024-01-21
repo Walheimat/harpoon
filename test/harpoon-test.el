@@ -13,23 +13,112 @@
       harpoon-checker-function nil
       harpoon-lsp-provider 'lsp-mode)
 
-(ert-deftest harpoon-prog-like ()
-  (bydi ((:mock run-hooks :with bydi-rf))
+(ert-deftest harpoon-prog-like--runs-hook ()
+  "Verify that `harpoon-prog-like' runs the eponymous hook."
+  :tags '(prog-like)
 
-    (should (equal (harpoon-prog-like) 'harpoon-prog-like-hook))))
+  (ert-with-test-buffer (:name "prog-like")
 
-(ert-deftest test-harpoon-treesit--ready-p ()
-  (defvar harpoon-treesit--alist)
-  (bydi ((:always wal-modern-emacs-p)
-         (:always require)
-         (:always treesit-available-p)
-         (:mock treesit-ready-p :with (lambda (it &rest _) (equal 'testable it))))
+    (add-hook 'harpoon-prog-like-hook (lambda () (insert "ran")) nil t)
 
-    (let ((harpoon-treesit--modes '((test-mode . testable) (zest-mode . zestable))))
+    (bydi ((:spy run-hooks))
+      (harpoon-prog-like)
 
-      (should (harpoon-treesit--ready-p 'test-mode))
-      (should-not (harpoon-treesit--ready-p 'zest-mode))
-      (should-not (harpoon-treesit--ready-p 'no-mapping-mode)))))
+      (bydi-was-called-with run-hooks 'harpoon-prog-like-hook))
+
+    (should (string-match-p "ran" (buffer-string)))))
+
+;;; Treesit
+
+(defmacro bydi--treesit-ready-p (toggle &rest args)
+  "Convenience `bydi' wrapper.
+
+Checks if function TOGGLE actually toggles the check. Evaluates
+ARGS after these checks."
+  (declare (indent defun))
+
+  `(bydi ((:sometimes harpoon--modern-emacs-p)
+          (:sometimes require)
+          (:sometimes treesit-available-p)
+          (:sometimes treesit-ready-p)
+          (:mock harpoon-treesit--language :with bydi-rf)
+          (:spy fboundp))
+     (bydi-when fboundp 'treesit-available-p t)
+     (bydi-when fboundp 'treesit-ready-p t)
+
+     (bydi-toggle-volatile ',toggle)
+
+     (should-not (harpoon-treesit--ready-p 'test-mode))
+
+     (bydi-toggle-volatile ',toggle t)
+
+     (should (harpoon-treesit--ready-p 'test-mode))
+     (bydi-was-called-n-times ,toggle 2)
+
+     ,@args))
+
+(ert-deftest treesit--ready-p--requires-emacs-29 ()
+  "Emacs needs to be version 29 at least."
+  :tags '(treesit)
+
+  (bydi--treesit-ready-p harpoon--modern-emacs-p
+    (bydi-was-called-last-with harpoon--modern-emacs-p 29)))
+
+(ert-deftest treesit--ready-p--treesit-must-be-available ()
+  "Tree-sitting must be available."
+  :tags '(treesit)
+
+  (bydi--treesit-ready-p treesit-available-p
+    (bydi-was-called-n-times treesit-ready-p 1)))
+
+(ert-deftest treesit--ready-p--language-must-be-ready ()
+  "Language must be ready."
+  :tags '(treesit)
+
+  (bydi--treesit-ready-p treesit-ready-p))
+
+(defmacro bydi--treesit-accessor (accessor var &optional defaults)
+  "Test ACCESSOR using VAR.
+
+If DEFAULTS is t, also check defaulting to key."
+  `(bydi ((:spy harpoon--safe-assoc))
+     (let ((,var '((test-mode . test))))
+
+       (should (eq 'test (,accessor 'test-mode)))
+       (bydi-was-called harpoon--safe-assoc)
+       (when ,defaults
+         (let ((,var nil))
+           (should (eq 'test-mode (,accessor 'test-mode))))))))
+
+(ert-deftest treesit--language ()
+  "Gets known languages safely."
+  :tags '(treesit)
+
+  (bydi--treesit-accessor harpoon-treesit--language harpoon-treesit--modes))
+
+(ert-deftest treesit--maybe-alias ()
+  "Only returns known aliases, otherwise the passed name."
+  :tags '(treesit)
+
+  (bydi--treesit-accessor harpoon-treesit--maybe-alias harpoon-treesit--aliases t))
+
+(ert-deftest treesit--maybe-replace ()
+  "Only returns known aliases, otherwise the passed name."
+  :tags '(treesit)
+
+  (bydi--treesit-accessor harpoon-treesit--maybe-replace harpoon-treesit--replacements t))
+
+(ert-deftest treesit--name ()
+  "Returns interned symbol with ts infix."
+  :tags '(treesit)
+
+  (bydi ((:mock harpoon-treesit--maybe-replace :with bydi-rf)
+         (:spy intern))
+
+    (should (eq 'test-ts-mode (harpoon-treesit--name 'test-mode)))
+
+    (bydi-was-called-with intern "test-ts-mode")
+    (bydi-was-called harpoon-treesit--maybe-replace)))
 
 (ert-deftest harpoon-ligatures--set-ligatures ()
   (defvar harpoon-ligatures--common-ligatures)

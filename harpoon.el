@@ -306,6 +306,13 @@ throws are 3 or THROWS."
         (seq-min results)
       (seq-max results))))
 
+(defun harpoon--safe-assoc (key alist &optional default)
+  "Safely get KEY from ALIST.
+
+If key cannot be found, return DEFAULT."
+  (or (cdr-safe (assoc key alist))
+      default))
+
 ;;;; Prog-like
 
 (defvar harpoon-prog-like-hook nil
@@ -430,17 +437,15 @@ If NEW is t, log this name as created."
 
 (defun harpoon-treesit--language (name)
   "Get language for NAME."
-  (cdr-safe (assoc name harpoon-treesit--modes)))
+  (harpoon--safe-assoc name harpoon-treesit--modes))
 
 (defun harpoon-treesit--maybe-alias (name)
   "Get the potentially aliased mode name for NAME."
-  (or (cdr-safe (assoc name harpoon-treesit--aliases))
-      name))
+  (harpoon--safe-assoc name harpoon-treesit--aliases name))
 
 (defun harpoon-treesit--maybe-replace (name)
   "Get the potentially replaced mode name for NAME."
-  (or (cdr-safe (assoc name harpoon-treesit--replacements))
-      name))
+  (harpoon--safe-assoc name harpoon-treesit--replacements name))
 
 (defun harpoon-treesit--name (name)
   "Get treesit name for NAME."

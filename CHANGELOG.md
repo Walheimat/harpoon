@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Messages are now shown after an idle delay of 1 second.
 
+### Fixed
+
+- The message whale now uses face `font-lock-type-face` instead to
+  avoid being invisible in echo area.
+
 ## [0.3.3]
 
 ### Added

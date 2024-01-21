@@ -180,7 +180,7 @@ appended to LIGATURES."
 
 ;;;; Messages
 
-(defconst harpoon-message--ascii-blue-whale (propertize "}    , ﬞ   ⎠" 'face 'mode-line-emphasis)
+(defconst harpoon-message--ascii-blue-whale (propertize "}    , ﬞ   ⎠" 'face 'font-lock-type-face)
   "A small, highlighted ASCII blue whale.")
 
 (defun harpoon-message--in-a-bottle (bottle &optional whale)

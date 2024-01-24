@@ -477,11 +477,12 @@ BIND is either a symbol, t or nil. If it is a symbol, the
 `harpoon-bind-key' will be bound to it. If it is t, a symbol
 yielded from `harpoon-bind-function' will be bound instead.
 
-COMPLETION is a list of (IDLE-DELAY PREFIX-LENGTH). Otherwise
-defaults `harpoon-completion-delay' and
-`harpoon-completion-prefix' are used. These values are set based
-on `harpoon-completion-provider'. See also
-`harpoon-lsp-completion-styles' if you enable LSP.
+COMPLETION is either a list of (IDLE-DELAY PREFIX-LENGTH) or a
+plist with optional keys PROVIDER (defaults to
+`harpoon-completion-provider'), DELAY and PREFIX. Their values
+are handled based on the given provider (currently only `corfu'
+is supported). See also `harpoon-lsp-completion-styles' if you
+enable LSP.
 
 FUNCTIONS is a list of functions (for example modes) that should
 be called if they are bound.

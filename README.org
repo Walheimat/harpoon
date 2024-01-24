@@ -32,7 +32,7 @@ Let's take a look at a form using all currently available features.
 #+begin_src emacs-lisp
 (harpoon some-mode
   :bind t
-  :completion (:provider corfu :auto t :prefix 1 :delay 0.1)
+  :completion (:provider corfu :prefix 1 :delay 0.1)
   :functions (some-fun other-fun)
   :ligatures ("::" ">>")
   :lsp (:function lsp-deferred :dir-ignore-list lsp-file-watch-ignored-list :ignore-dirs (".bucket"))
@@ -54,7 +54,9 @@ symbol that will be bound.
 The setting for =:completion= is a plist configuring the
 =harpoon-completion-provider= (only =corfu= is currently supported) to
 enable automatic completion with a prefix length of 1 and a delay of
-0.1.
+0.1. This does not set values that aren't explicitly set. You don't
+need to set =provider= if the default (=harpoon-completion-provider=)
+should be used.
 
 The list of symbols passed to =:functions= are called on the condition
 that they are bound when =some-mode= is enabled.

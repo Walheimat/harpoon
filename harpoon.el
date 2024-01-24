@@ -56,16 +56,6 @@ smaller."
   :type 'symbol
   :group 'harpoon)
 
-(defcustom harpoon-completion-delay 0.2
-  "The default delay for auto-completion."
-  :type 'float
-  :group 'harpoon)
-
-(defcustom harpoon-completion-prefix 3
-  "The default prefix length for completion."
-  :type 'integer
-  :group 'harpoon)
-
 (defcustom harpoon-checker-function 'flycheck-mode
   "The checker to use.
 
@@ -150,11 +140,11 @@ This is either a plist or a cons of auto delay and auto prefix.
 Return list of four."
   (if (and (harpoon--plistp values '(:provider :delay :prefix)))
       (list (harpoon--maybe-plist-get values :provider harpoon-completion-provider)
-            (harpoon--maybe-plist-get values :delay harpoon-completion-delay)
-            (harpoon--maybe-plist-get values :prefix harpoon-completion-prefix))
+            (harpoon--maybe-plist-get values :delay)
+            (harpoon--maybe-plist-get values :prefix))
     (list harpoon-completion-provider
-          (or (car values) harpoon-completion-delay)
-          (or (cadr values) harpoon-completion-prefix))))
+          (car values)
+          (cadr values))))
 
 ;;;; Ligatures
 
@@ -574,20 +564,24 @@ MESSAGES and TABS."
                 (,fun)))
 
           ;; Completion.
-          ,@(unless flat
-              (cl-destructuring-bind
-                  (provider delay prefix)
-                  (harpoon-completion--parse completion)
-                (harpoon--log
-                 "Setting up `%s' for `%s' using delay %.1f and prefix %d"
-                 provider name delay prefix)
-                (pcase provider
-                  ('corfu
-                   `((setq-local corfu-auto-delay ,delay
-                                 corfu-auto-prefix ,prefix)))
-                  (_
-                   (harpoon--warn "Completion provider '%s' is not handled" provider)
-                   nil))))
+          ,(unless flat
+             (cl-destructuring-bind
+                 (provider delay prefix)
+                 (harpoon-completion--parse completion)
+
+                 (pcase provider
+                   ('corfu
+                    (and (or delay prefix)
+                         (progn (harpoon--log
+                                 "Setting up `corfu' for `%s' using delay %s and prefix %s"
+                                 name (or delay "default") (or prefix "default"))
+
+                                `(setq-local ,@(delq
+                                                nil
+                                                `(,@(when delay `(corfu-auto-delay ,delay))
+                                                  ,@(when prefix `(corfu-auto-prefix ,prefix))))))))
+                   (_
+                    (harpoon--warn "Unknown completion provider `%s'" provider)))))
 
           ;; Prog-like.
           ,(when prog-like

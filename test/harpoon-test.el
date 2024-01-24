@@ -478,6 +478,8 @@ If DEFAULTS is t, also check defaulting to key."
         (message "hi")))))
 
 (ert-deftest harpoon-function--missing-provider ()
+  :tags '(completion)
+
   (let ((harpoon-lsp-provider 'none))
 
     (bydi ((:spy harpoon--warn))
@@ -492,7 +494,10 @@ If DEFAULTS is t, also check defaulting to key."
       (bydi-was-called harpoon--warn))))
 
 (ert-deftest harpoon-completion--setup ()
+  ;; Having set completion provider.
   (let ((harpoon-completion-provider 'corfu))
+
+    ;; Passing normal list works.
     (bydi-match-expansion
      (harpoon-function test-mode
        :messages ("Just testing")
@@ -503,7 +508,68 @@ If DEFAULTS is t, also check defaulting to key."
         (harpoon-message '("Just testing"))
         (message "hi")
         (setq-local corfu-auto-delay 0.2
-                    corfu-auto-prefix 4)))))
+                    corfu-auto-prefix 4)))
+
+    ;; Passing plist with just prefix works.
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :messages ("Just testing")
+       :completion (:prefix 4)
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (harpoon-message '("Just testing"))
+        (message "hi")
+        (setq-local corfu-auto-prefix 4)))
+
+    ;; Passing normal list only having prefix works.
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :messages ("Just testing")
+       :completion (nil 4)
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (harpoon-message '("Just testing"))
+        (message "hi")
+        (setq-local corfu-auto-prefix 4)))
+
+    ;; Passing no completion config works.
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :messages ("Just testing")
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (harpoon-message '("Just testing"))
+        (message "hi"))))
+
+  ;; Without setting provider.
+
+  ;; Passing explicit provider works.
+  (bydi-match-expansion
+   (harpoon-function test-mode
+     :messages ("Just testing")
+     :completion (:provider corfu :delay 4)
+     (message "hi"))
+   `(defun test-mode-harpoon ()
+      "Hook into `test-mode'."
+      (harpoon-message '("Just testing"))
+      (message "hi")
+      (setq-local corfu-auto-delay 4)))
+
+  ;; Passing both delay and prefix works.
+  (bydi-match-expansion
+   (harpoon-function test-mode
+     :messages ("Just testing")
+     :completion (:provider corfu :delay 0.2 :prefix 4)
+     (message "hi"))
+   `(defun test-mode-harpoon ()
+      "Hook into `test-mode'."
+      (harpoon-message '("Just testing"))
+      (message "hi")
+      (setq-local corfu-auto-delay 0.2
+                  corfu-auto-prefix 4))))
 
 (ert-deftest harpoon--functions ()
   (let ((harpoon-completion-provider nil))

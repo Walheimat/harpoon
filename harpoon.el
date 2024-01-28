@@ -2,7 +2,7 @@
 
 ;; Author: Krister Schuchardt <krister.schuchardt@gmail.com>
 ;; Homepage: https://github.com/Walheimat/partial-recall
-;; Version: 0.3.4
+;; Version: 0.3.5
 
 ;; Keywords: frames files convenience
 

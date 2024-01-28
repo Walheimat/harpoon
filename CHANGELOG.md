@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.5](https://github.com/Walheimat/harpoon/compare/v0.3.4...v0.3.5) (2024-01-28)
+
+
+### Features
+
+* **ci:** add semantic-release ([af8f7fc](https://github.com/Walheimat/harpoon/commit/af8f7fc53c2fd0dced840cc0b1d3c6adce20e0be))
+* **completion:** remove defaulting ([b44adbe](https://github.com/Walheimat/harpoon/commit/b44adbece462713b8cc75b0711b5b00b1d60f897))
+
 ## [0.3.4]
 
 ### Added

@@ -5,3 +5,4 @@ coverage
 dist/
 harpoon-autoloads.el
 harpoon-pkg.el
+node_modules/

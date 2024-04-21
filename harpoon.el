@@ -564,6 +564,13 @@ MESSAGES and TABS."
                   (setq-local completion-styles harpoon-lsp-completion-styles))
                 (,fun)))
 
+          ;; Formatting.
+          ,(when-let* ((do-format (harpoon--maybe-plist-get lsp :format)))
+
+             (pcase harpoon-lsp-provider
+               ('lsp-mode
+                `(add-hook 'before-save-hook 'lsp-format-buffer nil t))))
+
           ;; Completion.
           ,(unless flat
              (cl-destructuring-bind

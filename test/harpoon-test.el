@@ -493,6 +493,22 @@ If DEFAULTS is t, also check defaulting to key."
 
       (bydi-was-called harpoon--warn))))
 
+(ert-deftest harpoon-function--lsp-formatting ()
+  :tags '(lsp)
+
+  (bydi ((:spy harpoon--warn))
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :messages ("Just testing")
+       :lsp (:format t))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (harpoon-message '("Just testing"))
+        (unless (harpoon-lsp--slow-server-p major-mode)
+          (setq-local completion-styles harpoon-lsp-completion-styles))
+        (lsp-deferred)
+        (add-hook 'before-save-hook 'lsp-format-buffer nil t)))))
+
 (ert-deftest harpoon-completion--setup ()
   ;; Having set completion provider.
   (let ((harpoon-completion-provider 'corfu))

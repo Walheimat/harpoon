@@ -40,6 +40,7 @@ Let's take a look at a form using all currently available features.
   :prog-like t
   :tabs t
   :checker flycheck-mode
+  :whitespace delete
 
   (some-other-fun)
   (setq some-other-var t))
@@ -108,6 +109,12 @@ modes/languages.
 If you pass =:flat t= completion and syntax checking is not set up.
 This can be useful if you have some configuration for a mode and
 others for those derived from it.
+
+Setting =:whitespace delete= means a =before-save-hook= will be
+installed to call =delete-trailing-whitespace=. This can also be
+enabled generally by setting =harpoon-whitespace= to =delete=. If you
+do that but want to exclude some modes, you can pass =:whitespace
+keep= for them.
 
 You can set =harpoon-log= to =t= in your init file if you want to see
 what expanding your =harpoon= form(s) did. You can switch to the logs

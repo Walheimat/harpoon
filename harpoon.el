@@ -104,6 +104,13 @@ The logging is done to buffer `harpoon-log--buffer'."
   :type 'string
   :group 'harpoon)
 
+(defcustom harpoon-whitespace 'keep
+  "Whether whitespace deletion should always happen before save."
+  :type '(choice
+          (const :tag "Don't delete" keep)
+          (const :tag "Delete" delete))
+  :group 'harpoon)
+
 ;;; Faces
 
 (defface harpoon-emphasis
@@ -356,6 +363,7 @@ The message is formatted using optional ARGS."
 (defvar harpoon--keywords
   '(:bind
     :completion
+    :whitespace
     :functions
     :ligatures
     :lsp
@@ -470,6 +478,7 @@ If NEW is t, log this name as created."
      tabs
      checker
      flat
+     whitespace
      &allow-other-keys)
   "Create hook function for NAME.
 
@@ -508,6 +517,9 @@ defaulting to `harpoon-checker-function'.
 If FLAT is t, setup for syntax checker and completion is skipped.
 This makes sense if you create a `harpoon' for a major mode that
 others derive from and also have a `harpoon'.
+
+WHITESPACE can override `harpoon-whitespace', setting either
+`keep' or `delete'.
 
 The rest of the BODY will be spliced into the hook function after
 MESSAGES and TABS."
@@ -570,6 +582,13 @@ MESSAGES and TABS."
              (pcase harpoon-lsp-provider
                ('lsp-mode
                 `(add-hook 'before-save-hook 'lsp-format-buffer nil t))))
+
+          ,(when (or (and whitespace
+                          (eq 'delete whitespace))
+                     (and (eq 'delete harpoon-whitespace)
+                          (or (not whitespace)
+                              (not (eq 'keep whitespace)))))
+             `(add-hook 'before-save-hook 'delete-trailing-whitespace nil t))
 
           ;; Completion.
           ,(unless flat

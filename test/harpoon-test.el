@@ -509,6 +509,54 @@ If DEFAULTS is t, also check defaulting to key."
         (lsp-deferred)
         (add-hook 'before-save-hook 'lsp-format-buffer nil t)))))
 
+(ert-deftest harpoon-function--whitespace-deletion ()
+  :tags '(lsp)
+
+  (let ((harpoon-whitespace 'delete))
+
+    (bydi ((:spy harpoon--warn))
+      (bydi-match-expansion
+       (harpoon-function test-mode
+         :messages ("Just testing"))
+       `(defun test-mode-harpoon ()
+          "Hook into `test-mode'."
+          (harpoon-message '("Just testing"))
+          (add-hook 'before-save-hook 'delete-trailing-whitespace nil t)))))
+
+  (let ((harpoon-whitespace 'delete))
+
+    (bydi ((:spy harpoon--warn))
+      (bydi-match-expansion
+       (harpoon-function test-mode
+         :messages ("Just testing")
+         :whitespace keep)
+       `(defun test-mode-harpoon ()
+          "Hook into `test-mode'."
+          (harpoon-message '("Just testing"))))))
+
+  (let ((harpoon-whitespace 'keep))
+
+    (bydi ((:spy harpoon--warn))
+      (bydi-match-expansion
+       (harpoon-function test-mode
+         :messages ("Just testing")
+         :whitespace delete)
+       `(defun test-mode-harpoon ()
+          "Hook into `test-mode'."
+          (harpoon-message '("Just testing"))
+          (add-hook 'before-save-hook 'delete-trailing-whitespace nil t)))))
+
+  (let ((harpoon-whitespace 'keep))
+
+    (bydi ((:spy harpoon--warn))
+      (bydi-match-expansion
+       (harpoon-function test-mode
+         :messages ("Just testing")
+         :whitespace remove)
+       `(defun test-mode-harpoon ()
+          "Hook into `test-mode'."
+          (harpoon-message '("Just testing")))))))
+
 (ert-deftest harpoon-completion--setup ()
   ;; Having set completion provider.
   (let ((harpoon-completion-provider 'corfu))

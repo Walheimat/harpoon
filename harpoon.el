@@ -562,7 +562,16 @@ MESSAGES and TABS."
              (harpoon--log "Setting up checker `%s' for `%s'" checker name)
              `(,checker))
 
-          ;; LSP.
+          ;; LSP
+
+          ;; Inlay hints.
+          ,(when-let* ((do-show (harpoon--maybe-plist-get lsp :hints)))
+
+             (pcase harpoon-lsp-provider
+               ('lsp-mode
+                `(setq-local lsp-inlay-hint-enable t))))
+
+          ;; Activation and setting up completion styles.
           ,@(and-let* (lsp
                        (from-provider (pcase harpoon-lsp-provider
                                         ('lsp-mode
@@ -576,7 +585,7 @@ MESSAGES and TABS."
                   (setq-local completion-styles harpoon-lsp-completion-styles))
                 (,fun)))
 
-          ;; Formatting.
+          ;; Format with LSP.
           ,(when-let* ((do-format (harpoon--maybe-plist-get lsp :format)))
 
              (pcase harpoon-lsp-provider

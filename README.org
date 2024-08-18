@@ -35,7 +35,7 @@ Let's take a look at a form using all currently available features.
   :completion (:provider corfu :prefix 1 :delay 0.1)
   :functions (some-fun other-fun)
   :ligatures ("::" ">>")
-  :lsp (:function lsp-deferred :dir-ignore-list lsp-file-watch-ignored-list :ignore-dirs (".bucket"))
+  :lsp (:function lsp-deferred :dir-ignore-list lsp-file-watch-ignored-list :ignore-dirs (".bucket") :hints t)
   :messages ("Something in the way" "She moves")
   :prog-like t
   :tabs t
@@ -71,7 +71,8 @@ list and call =lsp-deferred= when =some-mode= is enabled. Note that
 you don't need to set =:function= if you set =harpoon-lsp-function=,
 but you could set =eglot-ensure= here instead to have some other mode
 use that. The ignore list will default to
-=harpoon-lsp-dir-ignore-list=.
+=harpoon-lsp-dir-ignore-list=. If you pass =:hints t= inlay hints will
+be enabled.
 
 Entries in the list of strings passed to =:messages= will be displayed
 randomly when =some-mode= is enabled.

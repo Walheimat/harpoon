@@ -509,6 +509,20 @@ If DEFAULTS is t, also check defaulting to key."
         (lsp-deferred)
         (add-hook 'before-save-hook 'lsp-format-buffer nil t)))))
 
+(ert-deftest harpoon-function--lsp-hints ()
+  :tags '(lsp)
+
+  (let ((harpoon-whitespace 'keep))
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :lsp (:hints t))
+     `(defun test-mode-harpoon nil
+       "Hook into `test-mode'."
+       (setq-local lsp-inlay-hint-enable t)
+       (unless (harpoon-lsp--slow-server-p major-mode)
+         (setq-local completion-styles harpoon-lsp-completion-styles))
+       (lsp-deferred)))))
+
 (ert-deftest harpoon-function--whitespace-deletion ()
   :tags '(lsp)
 

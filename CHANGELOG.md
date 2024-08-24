@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.6](https://github.com/Walheimat/harpoon/compare/v0.3.5...v0.3.6) (2024-08-24)
+
+
+### Features
+
+* **function:** harpoon-whitespace and keyword :whitespace ([2b88d32](https://github.com/Walheimat/harpoon/commit/2b88d324501ac4393ce617da8a901721a42a482e))
+* **lsp:** keyword :format to format buffer before save ([e57204b](https://github.com/Walheimat/harpoon/commit/e57204b9e728121c89a62ff85c2e059ff60f53a3))
+
 ## [0.3.5](https://github.com/Walheimat/harpoon/compare/v0.3.4...v0.3.5) (2024-01-28)
 
 

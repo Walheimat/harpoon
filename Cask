@@ -7,6 +7,6 @@
  (depends-on "undercover")
  (depends-on "compat"))
 
-(package "harpoon" "0.3.5" "Standardized major-mode hooks")
+(package "harpoon" "0.3.6" "Standardized major-mode hooks")
 
 (package-file "harpoon.el")

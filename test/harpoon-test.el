@@ -671,7 +671,7 @@ If DEFAULTS is t, also check defaulting to key."
    `(progn
       (harpoon-ligatures--set-ligatures 'test-mode '("?!"))))
 
-  (let ((harpoon-ligatures--sisters '((test-mode . (mock-mode)))))
+  (let ((harpoon--sisters '((test-mode . (mock-mode)))))
     (bydi-match-expansion
      (harpoon-ligatures test-mode
        :ligatures ("?!"))
@@ -715,7 +715,7 @@ If DEFAULTS is t, also check defaulting to key."
     (should (equal 'test-ts-mode (harpoon--mode-name 'test-mode)))))
 
 (ert-deftest harpoon-hook ()
-  (let ((harpoon-hook--sisters '((test-mode-hook . (test-extra-mode-hook)))))
+  (let ((harpoon--sisters '((test-mode . (test-extra-mode)))))
 
     (bydi-match-expansion
      (harpoon-hook test-mode)

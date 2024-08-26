@@ -643,26 +643,23 @@ MESSAGES and TABS."
                  (kbd harpoon-bind-key)
                  ',key)))))))
 
-(defvar harpoon-hook--sisters '((typescript-ts-mode-hook . (tsx-ts-mode-hook)))
+(defvar harpoon--sisters '((typescript-ts-mode . (tsx-ts-mode)))
   "Alist of sister modes.
 
 These are modes that should work exactly like the original mode.")
 
 (defmacro harpoon-hook (name)
   "Create the hook call for NAME."
-  (let* ((hook (harpoon--function-name name))
-         (harpoon (harpoon--function-name name t))
-         (sisters (append (list hook)
-                          (cdr-safe (assoc hook harpoon-hook--sisters)))))
+  (let* ((harpoon (harpoon--function-name name t))
+         (name (harpoon--mode-name name))
+         (sisters (append (list name)
+                          (cdr-safe (assoc name harpoon--sisters)))))
 
     `(progn
        ,@(mapcar
           (lambda (it)
-            `(add-hook ',it ',harpoon))
+            `(add-hook ',(harpoon--function-name it) ',harpoon))
           sisters))))
-
-(defvar harpoon-ligatures--sisters '((typescript-ts-mode . (tsx-ts-mode)))
-  "Alist of sister modes.")
 
 (cl-defmacro harpoon-ligatures (name &key ligatures &allow-other-keys)
   "Set up ligatures for NAME.
@@ -674,7 +671,7 @@ LIGATURES is a list of strings that should be set using
   (when-let* ((non-empty ligatures)
               (mode (harpoon--mode-name name))
               (sisters (append (list mode)
-                               (cdr-safe (assoc mode harpoon-ligatures--sisters)))))
+                               (cdr-safe (assoc mode harpoon--sisters)))))
 
     (harpoon--log "Will set up ligatures %s for `%s'" name ligatures)
 

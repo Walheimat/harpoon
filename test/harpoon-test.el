@@ -668,7 +668,16 @@ If DEFAULTS is t, also check defaulting to key."
   (bydi-match-expansion
    (harpoon-ligatures test-mode
      :ligatures ("?!"))
-   `(harpoon-ligatures--set-ligatures 'test-mode '("?!"))))
+   `(progn
+      (harpoon-ligatures--set-ligatures 'test-mode '("?!"))))
+
+  (let ((harpoon-ligatures--sisters '((test-mode . (mock-mode)))))
+    (bydi-match-expansion
+     (harpoon-ligatures test-mode
+       :ligatures ("?!"))
+     `(progn
+        (harpoon-ligatures--set-ligatures 'test-mode '("?!"))
+        (harpoon-ligatures--set-ligatures 'mock-mode '("?!"))))))
 
 (ert-deftest harpoon-lsp ()
   (bydi-match-expansion

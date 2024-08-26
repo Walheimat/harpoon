@@ -661,6 +661,9 @@ These are modes that should work exactly like the original mode.")
             `(add-hook ',it ',harpoon))
           sisters))))
 
+(defvar harpoon-ligatures--sisters '((typescript-ts-mode . (tsx-ts-mode)))
+  "Alist of sister modes.")
+
 (cl-defmacro harpoon-ligatures (name &key ligatures &allow-other-keys)
   "Set up ligatures for NAME.
 
@@ -668,9 +671,18 @@ LIGATURES is a list of strings that should be set using
 `ligatures-set-ligatures'."
   (declare (indent defun))
 
-  (when-let ((non-empty ligatures))
+  (when-let* ((non-empty ligatures)
+              (mode (harpoon--mode-name name))
+              (sisters (append (list mode)
+                               (cdr-safe (assoc mode harpoon-ligatures--sisters)))))
 
-    `(harpoon-ligatures--set-ligatures ',(harpoon--mode-name name) ',ligatures)))
+    (harpoon--log "Will set up ligatures %s for `%s'" name ligatures)
+
+    `(progn
+       ,@(mapcar
+          (lambda (it)
+            `(harpoon-ligatures--set-ligatures ',it ',ligatures))
+          sisters))))
 
 (cl-defmacro harpoon-lsp (name &key lsp &allow-other-keys)
   "Set up LSP for NAME.

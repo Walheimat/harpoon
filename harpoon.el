@@ -180,9 +180,6 @@ appended to LIGATURES."
      (and-let* (((require 'ligature nil t))
                 (combined (append ligatures harpoon-ligatures--common-ligatures)))
 
-       (harpoon--log "Setting up ligatures [%s] for `%s'"
-                     (string-join combined " ")
-                     mode)
        (ligature-set-ligatures mode combined)))
     (_
      (user-error "Unsupported ligature provider `%s'" harpoon-ligature-provider))))
@@ -401,7 +398,7 @@ If NEW is t, log this name as created."
                  (intern))))
 
     (when new
-      (harpoon--log "Creating function named `%s' for `%s'" name mode))
+      (harpoon--log "Creating function named `%s'" name))
 
     name))
 
@@ -531,25 +528,24 @@ MESSAGES and TABS."
         nil
         `(;; Messages.
           ,(when messages
-             (harpoon--log "Will pick random message from [%s] for `%s'"
-                           (string-join messages "; ")
-                           name)
+             (harpoon--log "Will pick random message from: %s"
+                           (string-join messages " | "))
              `(harpoon-message ',messages))
 
           ;; Indentation.
           ,@(cond
              ((equal 'never tabs)
-              (harpoon--log "No tabs will be used for `%s'" name)
+              (harpoon--log "No tabs will be used")
               '((harpoon-tabs--disable)))
 
              ((equal 'always tabs)
-              (harpoon--log "Tabs will be used for `%s'" name)
+              (harpoon--log "Tabs will be used for")
               '((harpoon-tabs--enable)))
 
              ((not tabs) nil)
 
              (t
-              (harpoon--log "Tabs will be used conditionally for `%s'" name)
+              (harpoon--log "Tabs will be used conditionally")
               '((hack-local-variables)
                 (harpoon-tabs--maybe-enable))))
 
@@ -559,7 +555,7 @@ MESSAGES and TABS."
           ;; Checker.
           ,(and-let* (((not flat))
                       (checker (harpoon--value-unless-disabled checker harpoon-checker-function)))
-             (harpoon--log "Setting up checker `%s' for `%s'" checker name)
+             (harpoon--log "Setting up checker `%s'" checker)
              `(,checker))
 
           ;; LSP
@@ -580,7 +576,7 @@ MESSAGES and TABS."
                                          (harpoon--warn "Completion provider `%s' is not handled" harpoon-lsp-provider))))
                        (fun (harpoon--maybe-plist-get lsp :function from-provider)))
 
-              (harpoon--log "Will set up LSP using function `%s' for `%s'" fun name)
+              (harpoon--log "Will set up LSP using function `%s'" fun)
               `((unless (harpoon-lsp--slow-server-p major-mode)
                   (setq-local completion-styles harpoon-lsp-completion-styles))
                 (,fun)))
@@ -605,28 +601,28 @@ MESSAGES and TABS."
                  (provider delay prefix)
                  (harpoon-completion--parse completion)
 
-                 (pcase provider
-                   ('corfu
-                    (and (or delay prefix)
-                         (progn (harpoon--log
-                                 "Setting up `corfu' for `%s' using delay %s and prefix %s"
-                                 name (or delay "default") (or prefix "default"))
+               (pcase provider
+                 ('corfu
+                  (and (or delay prefix)
+                       (progn (harpoon--log
+                               "Setting up `corfu' using delay %s and prefix %s"
+                               (or delay "default") (or prefix "default"))
 
-                                `(setq-local ,@(delq
-                                                nil
-                                                `(,@(when delay `(corfu-auto-delay ,delay))
-                                                  ,@(when prefix `(corfu-auto-prefix ,prefix))))))))
-                   (_
-                    (harpoon--warn "Unknown completion provider `%s'" provider)))))
+                              `(setq-local ,@(delq
+                                              nil
+                                              `(,@(when delay `(corfu-auto-delay ,delay))
+                                                ,@(when prefix `(corfu-auto-prefix ,prefix))))))))
+                 (_
+                  (harpoon--warn "Unknown completion provider `%s'" provider)))))
 
           ;; Prog-like.
           ,(when prog-like
-             (harpoon--log "Will run `prog-like-hook' for `%s'" name)
+             (harpoon--log "Will run `prog-like-hook'")
              '(run-hooks 'harpoon-prog-like-hook))
 
           ;; Functions.
           ,(when functions
-             (harpoon--log "Setting up functions %s for `%s'" functions name)
+             (harpoon--log "Setting up functions: %s" (string-join (mapcar #'symbol-name functions) ", "))
              `(progn ,@(mapcar (lambda (it)
                                  `(when (fboundp ',it) (,it)))
                                functions)))
@@ -638,7 +634,7 @@ MESSAGES and TABS."
                           (funcall harpoon-bind-function name))
                          ((symbolp setting)
                           setting))))
-               (harpoon--log "Binding %s to `%s' for `%s'" harpoon-bind-key key name)
+               (harpoon--log "Binding %s to `%s'" harpoon-bind-key key)
                `(local-set-key
                  (kbd harpoon-bind-key)
                  ',key)))))))
@@ -648,12 +644,15 @@ MESSAGES and TABS."
 
 These are modes that should work exactly like the original mode.")
 
+(defun harpoon--sisters (name)
+  "Return the sisters of NAME."
+  (cdr-safe (assoc (harpoon--mode-name name) harpoon--sisters)))
+
 (defmacro harpoon-hook (name)
   "Create the hook call for NAME."
   (let* ((harpoon (harpoon--function-name name t))
-         (name (harpoon--mode-name name))
-         (sisters (append (list name)
-                          (cdr-safe (assoc name harpoon--sisters)))))
+         (sisters (append (list (harpoon--mode-name name))
+                          (harpoon--sisters name))))
 
     `(progn
        ,@(mapcar
@@ -673,7 +672,10 @@ LIGATURES is a list of strings that should be set using
               (sisters (append (list mode)
                                (cdr-safe (assoc mode harpoon--sisters)))))
 
-    (harpoon--log "Will set up ligatures %s for `%s'" name ligatures)
+    (when ligatures
+      (harpoon--log "Setting up with additional ligatures: %s"
+                    mode
+                    (string-join ligatures " ")))
 
     `(progn
        ,@(mapcar
@@ -681,16 +683,16 @@ LIGATURES is a list of strings that should be set using
             `(harpoon-ligatures--set-ligatures ',it ',ligatures))
           sisters))))
 
-(cl-defmacro harpoon-lsp (name &key lsp &allow-other-keys)
+(cl-defmacro harpoon-lsp (_name &key lsp &allow-other-keys)
   "Set up LSP for NAME.
 
 LSP is either nil, t or a plist. If it is a plist, key
 `:ignore-dirs' can be used to add additional paths to ignore."
   (when-let ((dirs (harpoon--maybe-plist-get lsp :ignore-dirs)))
-    (harpoon--log "Will ignore directories %s for `%s'" dirs name)
+    (harpoon--log "Will ignore directories: %s" (string-join dirs ", "))
     `(with-eval-after-load harpoon-lsp-provider
        (harpoon-lsp--ignore-directory ',(plist-get lsp :ignore-dirs)
-                                     ',(plist-get lsp :dir-ignore-list)))))
+                                      ',(plist-get lsp :dir-ignore-list)))))
 
 (cl-defmacro harpoon-treesit (name)
   "Remap mode NAME to tree-sitter variant if possible."
@@ -723,7 +725,13 @@ See documentation of macros `harpoon-function',
 `harpoon-ligatures' and `harpoon-lsp' for the available keywords."
   (declare (indent defun))
 
-  (harpoon-log--insert "\nSetting up `%s'" name)
+  (harpoon-log--insert "\nSetting up %s%s"
+                       name
+                       (if-let ((sisters (harpoon--sisters name)))
+                           (concat
+                            " and sister mode(s): "
+                            (string-join (mapcar #'symbol-name sisters) ", "))
+                         ""))
 
   `(progn
      (harpoon-function ,name ,@args)

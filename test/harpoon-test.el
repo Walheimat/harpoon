@@ -350,6 +350,33 @@ If DEFAULTS is t, also check defaulting to key."
 
       (harpoon-treesit test-mode))))
 
+(ert-deftest harpoon--sisters ()
+  (let ((harpoon--sisters '((test-mode mock-mode))))
+    (bydi-match-expansion
+     (harpoon test-mode
+       :messages ("Just testing")
+       :lsp t
+       :tabs t)
+     `(progn
+        (harpoon-function test-mode
+          :messages ("Just testing")
+          :lsp t
+          :tabs t)
+
+        (harpoon-hook test-mode)
+
+        (harpoon-ligatures test-mode
+          :messages ("Just testing")
+          :lsp t
+          :tabs t)
+
+        (harpoon-lsp test-mode
+         :messages ("Just testing")
+         :lsp t
+         :tabs t)
+
+        (harpoon-treesit test-mode)))))
+
 (ert-deftest harpoon-function ()
   (bydi-match-expansion
    (harpoon-function test-mode

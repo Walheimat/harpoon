@@ -43,8 +43,9 @@ ARGS after these checks."
           (:sometimes treesit-ready-p)
           (:mock harpoon-treesit--language :with bydi-rf)
           (:spy fboundp))
-     (bydi-when fboundp 'treesit-available-p t)
-     (bydi-when fboundp 'treesit-ready-p t)
+
+     (bydi-when fboundp :called-with '(treesit-available-p) :then-return t)
+     (bydi-when fboundp :called-with '(treesit-ready-p) :then-return t)
 
      (bydi-toggle-volatile ',toggle)
 

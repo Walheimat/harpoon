@@ -361,6 +361,8 @@ The message is formatted using optional ARGS."
   '(:bind
     :completion
     :whitespace
+    :before
+    :after
     :functions
     :ligatures
     :lsp
@@ -469,6 +471,8 @@ If NEW is t, log this name as created."
      bind
      completion
      functions
+     after
+     before
      lsp
      messages
      prog-like
@@ -490,8 +494,12 @@ are handled based on the given provider (currently only `corfu'
 is supported). See also `harpoon-lsp-completion-styles' if you
 enable LSP.
 
-FUNCTIONS is a list of functions (for example modes) that should
-be called if they are bound.
+After is a list of functions (for example modes) that should be called
+after all other setups. You can also use FUNCTIONS.
+
+BEFORE is a list of functions that should be called before any other
+setup.
+
 
 LSP is either nil, t or a plist. If it's not a plist, the
 defaults depend on the `harpoon-lsp-provider'.
@@ -526,7 +534,13 @@ MESSAGES and TABS."
      ,(format "Hook into `%s'." name)
      ,@(delete
         nil
-        `(;; Messages.
+        `(;; Before.
+          ,(when before
+             (harpoon--log "Will call these functions at the start: %s" (string-join (mapcar #'symbol-name before) ", "))
+             `(progn ,@(mapcar (lambda (it)
+                                 `(when (fboundp ',it) (,it)))
+                               before)))
+          ;; Messages.
           ,(when messages
              (harpoon--log "Will pick random message from: %s"
                            (string-join messages " | "))
@@ -620,9 +634,9 @@ MESSAGES and TABS."
              (harpoon--log "Will run `prog-like-hook'")
              '(run-hooks 'harpoon-prog-like-hook))
 
-          ;; Functions.
-          ,(when functions
-             (harpoon--log "Setting up functions: %s" (string-join (mapcar #'symbol-name functions) ", "))
+          ;; After.
+          ,(when-let ((functions (or after functions)))
+             (harpoon--log "Will call the following functions at the end: %s" (string-join (mapcar #'symbol-name functions) ", "))
              `(progn ,@(mapcar (lambda (it)
                                  `(when (fboundp ',it) (,it)))
                                functions)))

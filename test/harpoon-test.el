@@ -690,7 +690,33 @@ If DEFAULTS is t, also check defaulting to key."
           (when (fboundp 'test-mode)
             (test-mode))
           (when (fboundp 'testable-mode)
-            (testable-mode)))))))
+            (testable-mode)))))
+
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :after (test-mode testable-mode)
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (message "hi")
+        (progn
+          (when (fboundp 'test-mode)
+            (test-mode))
+          (when (fboundp 'testable-mode)
+            (testable-mode)))))
+
+    (bydi-match-expansion
+     (harpoon-function test-mode
+       :before (test-mode testable-mode)
+       (message "hi"))
+     `(defun test-mode-harpoon ()
+        "Hook into `test-mode'."
+        (progn
+          (when (fboundp 'test-mode)
+            (test-mode))
+          (when (fboundp 'testable-mode)
+            (testable-mode)))
+        (message "hi")))))
 
 (ert-deftest harpoon-ligatures ()
   (bydi-match-expansion

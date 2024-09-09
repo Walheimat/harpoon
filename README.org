@@ -33,7 +33,8 @@ Let's take a look at a form using all currently available features.
 (harpoon some-mode
   :bind t
   :completion (:provider corfu :prefix 1 :delay 0.1)
-  :functions (some-fun other-fun)
+  :before (some-fun)
+  :after (other-fun)
   :ligatures ("::" ">>")
   :lsp (:function lsp-deferred :dir-ignore-list lsp-file-watch-ignored-list :ignore-dirs (".bucket") :hints t)
   :messages ("Something in the way" "She moves")
@@ -59,8 +60,9 @@ enable automatic completion with a prefix length of 1 and a delay of
 need to set =provider= if the default (=harpoon-completion-provider=)
 should be used.
 
-The list of symbols passed to =:functions= are called on the condition
-that they are bound when =some-mode= is enabled.
+The list of symbols passed to =:before= and =:after= are called on the
+condition that they are bound, called at the head and at the tail end
+of the created function.
 
 The list of strings passed to =:ligatures= will be set for =some-mode=
 using package =ligature= provided it can be required. Have a look at

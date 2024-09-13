@@ -109,6 +109,9 @@ pattern for mode => language, and mode => treesitter variant isn't
 uniform, this currently only works for a small number of
 modes/languages.
 
+If you don't want this behavior, you may add a mode name
+=harpoon-treesit-blacklist= to ensure =treesit= isn't used for it.
+
 If you pass =:flat t= completion and syntax checking is not set up.
 This can be useful if you have some configuration for a mode and
 others for those derived from it.

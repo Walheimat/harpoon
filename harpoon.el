@@ -111,6 +111,11 @@ The logging is done to buffer `harpoon-log--buffer'."
           (const :tag "Delete" delete))
   :group 'harpoon)
 
+(defcustom harpoon-treesit-blacklist nil
+  "Modes that should not use `treesit' even if ready."
+  :type '(list symbol)
+  :group 'harpoon)
+
 ;;; Faces
 
 (defface harpoon-emphasis
@@ -430,7 +435,12 @@ If NEW is t, log this name as created."
        (and (fboundp 'treesit-available-p)
             (treesit-available-p))
        (and (fboundp 'treesit-ready-p)
-            (treesit-ready-p (harpoon-treesit--language name) t))))
+            (treesit-ready-p (harpoon-treesit--language name) t))
+       (not (harpoon-treesit--blacklisted name))))
+
+(defun harpoon-treesit--blacklisted (name)
+  "Check if NAME is whitelisted."
+  (memq name harpoon-treesit-blacklist))
 
 (defun harpoon-treesit--language (name)
   "Get language for NAME."

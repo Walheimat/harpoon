@@ -41,6 +41,7 @@ ARGS after these checks."
           (:sometimes require)
           (:sometimes treesit-available-p)
           (:sometimes treesit-ready-p)
+          (:othertimes harpoon-treesit--blacklisted)
           (:mock harpoon-treesit--language :with bydi-rf)
           (:spy fboundp))
 
@@ -77,6 +78,23 @@ ARGS after these checks."
   :tags '(treesit)
 
   (bydi--treesit-ready-p treesit-ready-p))
+
+(ert-deftest treesit--ready-p--language-must-be-whitelisted ()
+  "Mode must be whitelisted."
+  :tags '(treesit)
+  (bydi--treesit-ready-p harpoon-treesit--blacklisted))
+
+(ert-deftest treesit--whitelisted ()
+  "Unless blacklisted a mode is whitelisted."
+  :tags '(treesit)
+
+  (let ((harpoon-treesit-blacklist nil))
+
+    (should-not (harpoon-treesit--blacklisted 'test-mode))
+
+    (setq harpoon-treesit-blacklist '(test-mode))
+
+    (should (harpoon-treesit--blacklisted 'test-mode))))
 
 (defmacro bydi--treesit-accessor (accessor var &optional defaults)
   "Test ACCESSOR using VAR.

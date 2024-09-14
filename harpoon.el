@@ -38,11 +38,6 @@ obeyed."
   :type 'symbol
   :group 'harpoon)
 
-(defcustom harpoon-lsp-completion-styles '(partial-completion basic)
-  "The `completion-styles' used for LSP."
-  :type '(repeat sybmol)
-  :group 'harpoon)
-
 (defcustom harpoon-lsp-slow-modes '()
   "Modes that have slow language servers.
 
@@ -501,8 +496,7 @@ COMPLETION is either a list of (IDLE-DELAY PREFIX-LENGTH) or a
 plist with optional keys PROVIDER (defaults to
 `harpoon-completion-provider'), DELAY and PREFIX. Their values
 are handled based on the given provider (currently only `corfu'
-is supported). See also `harpoon-lsp-completion-styles' if you
-enable LSP.
+is supported).
 
 After is a list of functions (for example modes) that should be called
 after all other setups. You can also use FUNCTIONS.
@@ -601,9 +595,7 @@ MESSAGES and TABS."
                        (fun (harpoon--maybe-plist-get lsp :function from-provider)))
 
               (harpoon--log "Will set up LSP using function `%s'" fun)
-              `((unless (harpoon-lsp--slow-server-p major-mode)
-                  (setq-local completion-styles harpoon-lsp-completion-styles))
-                (,fun)))
+              `((,fun)))
 
           ;; Format with LSP.
           ,(when-let* ((do-format (harpoon--maybe-plist-get lsp :format)))

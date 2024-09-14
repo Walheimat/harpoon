@@ -403,8 +403,6 @@ If DEFAULTS is t, also check defaulting to key."
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
       (harpoon-message '("Just testing"))
-      (unless (harpoon-lsp--slow-server-p major-mode)
-        (setq-local completion-styles harpoon-lsp-completion-styles))
       (lsp-deferred))))
 
 (ert-deftest harpoon-function--custom ()
@@ -415,9 +413,7 @@ If DEFAULTS is t, also check defaulting to key."
    `(defun test-mode-harpoon ()
       "Hook into `test-mode'."
       (harpoon-message '("Just testing"))
-      (unless (harpoon-lsp--slow-server-p major-mode)
-          (setq-local completion-styles harpoon-lsp-completion-styles))
-        (eglot-ensure))))
+      (eglot-ensure))))
 
 (ert-deftest harpoon-function--some-symbol ()
   (bydi-match-expansion
@@ -550,8 +546,6 @@ If DEFAULTS is t, also check defaulting to key."
      `(defun test-mode-harpoon ()
         "Hook into `test-mode'."
         (harpoon-message '("Just testing"))
-        (unless (harpoon-lsp--slow-server-p major-mode)
-          (setq-local completion-styles harpoon-lsp-completion-styles))
         (lsp-deferred)
         (add-hook 'before-save-hook 'lsp-format-buffer nil t)))))
 
@@ -565,8 +559,6 @@ If DEFAULTS is t, also check defaulting to key."
      `(defun test-mode-harpoon nil
        "Hook into `test-mode'."
        (setq-local lsp-inlay-hint-enable t)
-       (unless (harpoon-lsp--slow-server-p major-mode)
-         (setq-local completion-styles harpoon-lsp-completion-styles))
        (lsp-deferred)))))
 
 (ert-deftest harpoon-function--whitespace-deletion ()

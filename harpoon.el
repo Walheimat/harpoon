@@ -410,6 +410,7 @@ If NEW is t, log this name as created."
                                  (typescript-mode . typescript)
                                  (c++-mode . cpp)
                                  (c-mode . c)
+                                 (java-mode . java)
                                  (python-mode . python)
                                  (js-json-mode . json)
                                  (yaml-mode . yaml)

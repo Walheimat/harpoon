@@ -94,7 +94,7 @@ The logging is done to buffer `harpoon-log--buffer'."
   :type 'boolean
   :group 'harpoon)
 
-(defcustom harpoon-message-prefix "}    , ﬞ   ⎠"
+(defcustom harpoon-message-prefix "}    , ﬞ   ]"
   "Prefix for mode messages."
   :type 'string
   :group 'harpoon)

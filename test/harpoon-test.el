@@ -313,7 +313,7 @@ If DEFAULTS is t, also check defaulting to key."
 
     (bydi ((:mock message :with bydi-rf))
 
-      (should (string-equal (harpoon-message--in-a-bottle bottle) "}    , ﬞ   ⎠ Sting is playing bass, yeah")))))
+      (should (string-equal (harpoon-message--in-a-bottle bottle) "}    , ⹈   ] Sting is playing bass, yeah")))))
 
 (ert-deftest harpoon-message--in-a-bottle--shows-passed-string ()
   (let ((bottle '("Sting is playing bass, yeah")))

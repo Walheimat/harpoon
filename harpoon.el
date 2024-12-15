@@ -330,10 +330,13 @@ The message is formatted using optional ARGS."
 (defvar harpoon-log--buffer " *harpoon*")
 
 (defun harpoon-log--insert (fmt &rest args)
-  "Use ARGS to format FMT if logging is enabled."
+  "Use ARGS to format FMT if logging is enabled.
+
+ARGS will be emphasized using `harpoon-log--emphasize'."
   (when harpoon-log
     (let ((buffer (get-buffer harpoon-log--buffer))
-          (inhibit-read-only t))
+          (inhibit-read-only t)
+          (args (mapcar #'harpoon-log--emphasize args)))
 
       (unless buffer
         (setq buffer (get-buffer-create harpoon-log--buffer))
@@ -348,6 +351,10 @@ The message is formatted using optional ARGS."
         (goto-char (point-max))
         (insert (apply #'format fmt args))
         (insert "\n")))))
+
+(defun harpoon-log--emphasize (item)
+  "Emphasize ITEM."
+  (propertize (format "%s" item) 'face 'harpoon-emphasis))
 
 (defun harpoon-log--insert-indented (fmt &rest args)
   "Use ARGS to format FMT but indent."

@@ -691,7 +691,6 @@ LIGATURES is a list of strings that should be set using
 
     (when ligatures
       (harpoon--log "Setting up with additional ligatures: %s"
-                    mode
                     (string-join ligatures " ")))
 
     `(progn
